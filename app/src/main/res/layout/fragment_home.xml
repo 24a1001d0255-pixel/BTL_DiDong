@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/cream_bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CHỌN NHANH, ĂN NGON"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/brown_accent"
+                    android:letterSpacing="0.05" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hôm nay ăn gì?"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLocationDistance"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="1.2 km"
+                android:textSize="12sp"
+                app:icon="@drawable/ic_map"
+                app:iconTint="#E07A5F"
+                android:textColor="#E07A5F"
+                app:strokeColor="#F4D3C9"
+                app:cornerRadius="18dp"
+                android:backgroundTint="@color/white"
+                android:paddingHorizontal="12dp" />
+        </LinearLayout>
+
+        <!-- Mode Toggle Group -->
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleGroupMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:singleSelection="true"
+            app:checkedButton="@+id/btnSolo"
+            android:background="@drawable/bg_toggle_group"
+            android:padding="4dp"
+            android:gravity="center">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSolo"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="44dp"
+                android:text="Cho tôi"
+                android:textSize="13sp"
+                app:icon="@drawable/ic_person"
+                app:iconGravity="textStart"
+                app:strokeWidth="0dp"
+                android:textColor="@color/forest_green"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGroup"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="44dp"
+                android:text="Đi cùng nhóm"
+                android:textSize="13sp"
+                app:icon="@drawable/ic_people"
+                app:iconGravity="textStart"
+                app:strokeWidth="0dp"
+                android:textColor="@color/text_muted"
+                app:backgroundTint="@android:color/transparent"
+                app:cornerRadius="8dp" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <!-- GROUP MODE EXTRA CONTROLS -->
+        <LinearLayout
+            android:id="@+id/layoutGroupExtraControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp">
+
+            <!-- Số người counter row -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Số người"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_dark"
+                    android:layout_centerVertical="true" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_card"
+                    android:layout_alignParentEnd="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPeopleMinus"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:text="-"
+                        android:textSize="16sp"
+                        android:textColor="@color/text_dark"
+                        app:strokeColor="@color/stroke_color"
+                        android:padding="0dp"
+                        app:cornerRadius="16dp" />
+
+                    <TextView
+                        android:id="@+id/tvPeopleCount"
+                        android:layout_width="36dp"
+                        android:layout_height="wrap_content"
+                        android:text="4"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_dark"
+                        android:gravity="center" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPeoplePlus"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:text="+"
+                        android:textSize="16sp"
+                        android:textColor="@color/white"
+                        app:backgroundTint="@color/forest_green"
+                        android:padding="0dp"
+                        app:cornerRadius="16dp" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <!-- Group Option Toggle: Một quán chung vs Cụm quán gần -->
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleGroupType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:singleSelection="true"
+                app:checkedButton="@+id/btnSingleOption"
+                android:gravity="center">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSingleOption"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="42dp"
+                    android:text="👥 Một quán chung"
+                    android:textSize="12sp"
+                    app:strokeColor="@color/forest_green"
+                    android:textColor="@color/forest_green"
+                    app:backgroundTint="@color/forest_green_light" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnClusterOption"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="42dp"
+                    android:text="🗺️ Cụm quán gần"
+                    android:textSize="12sp"
+                    app:strokeColor="@color/stroke_color"
+                    android:textColor="@color/text_muted"
+                    app:backgroundTint="@color/white" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <!-- Action Button for Group Search -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFindGroupOption"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="🔍 Tìm phương án cho nhóm"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/forest_green"
+                app:cornerRadius="12dp"
+                android:layout_marginBottom="8dp" />
+        </LinearLayout>
+
+        <!-- ChipGroup Danh mục Món ăn -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupFood"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:chipSpacingHorizontal="6dp"
+            app:chipSpacingVertical="2dp"
+            app:singleSelection="false">
+
+            <com.google.android.material.chip.Chip
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Phở"
+                android:textSize="11sp"
+                android:textColor="@color/white"
+                app:chipBackgroundColor="@color/forest_green"
+                style="@style/Widget.MaterialComponents.Chip.Filter" />
+
+            <com.google.android.material.chip.Chip
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Cơm"
+                android:textSize="11sp"
+                android:textColor="@color/white"
+                app:chipBackgroundColor="@color/forest_green"
+                style="@style/Widget.MaterialComponents.Chip.Filter" />
+
+            <com.google.android.material.chip.Chip
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Bánh mì"
+                android:textSize="11sp"
+                android:textColor="@color/white"
+                app:chipBackgroundColor="@color/forest_green"
+                style="@style/Widget.MaterialComponents.Chip.Filter" />
+
+            <com.google.android.material.chip.Chip
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Đồ nướng"
+                android:textSize="11sp"
+                android:textColor="@color/white"
+                app:chipBackgroundColor="@color/forest_green"
+                style="@style/Widget.MaterialComponents.Chip.Filter" />
+
+            <com.google.android.material.chip.Chip
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Ăn vặt"
+                android:textSize="11sp"
+                android:textColor="@color/white"
+                app:chipBackgroundColor="@color/forest_green"
+                style="@style/Widget.MaterialComponents.Chip.Filter" />
+
+            <com.google.android.material.chip.Chip
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Đồ uống"
+                android:textSize="11sp"
+                android:textColor="@color/white"
+                app:chipBackgroundColor="@color/forest_green"
+                style="@style/Widget.MaterialComponents.Chip.Filter" />
+
+            <com.google.android.material.chip.Chip
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Bún"
+                android:textSize="11sp"
+                android:textColor="@color/white"
+                app:chipBackgroundColor="@color/forest_green"
+                style="@style/Widget.MaterialComponents.Chip.Filter" />
+
+            <com.google.android.material.chip.Chip
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Lẩu"
+                android:textSize="11sp"
+                android:textColor="@color/white"
+                app:chipBackgroundColor="@color/forest_green"
+                style="@style/Widget.MaterialComponents.Chip.Filter" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- Nhóm món và Sửa vòng quay -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp">
+
+            <TextView
+                android:id="@+id/tvGroupCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="8 nhóm món"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:layout_centerVertical="true" />
+
+            <TextView
+                android:id="@+id/btnEditWheel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚙️ Sửa vòng quay"
+                android:textColor="@color/forest_green"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackground"
+                android:padding="2dp" />
+        </RelativeLayout>
+
+        <!-- Refined Sliders Section with Hollow Thumb -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="8dp">
+
+            <!-- Budget Slider Block -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tvBudgetTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ngân sách của bạn"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvBudgetVal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tối đa 80k"
+                    android:textColor="@color/brown_accent"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:layout_alignParentEnd="true" />
+            </RelativeLayout>
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/sliderBudget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="20000"
+                android:valueTo="300000"
+                android:value="80000"
+                android:stepSize="10000"
+                app:thumbColor="@color/white"
+                app:thumbStrokeColor="@color/forest_green"
+                app:thumbStrokeWidth="2dp"
+                app:trackColorActive="@color/forest_green"
+                app:trackColorInactive="#E0E0E0"
+                app:trackHeight="4dp"
+                app:haloRadius="0dp" />
+
+            <!-- Underneath Labels -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-8dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="20k"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_muted"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="80k"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/forest_green"
+                    android:layout_centerInParent="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="300k+"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_muted"
+                    android:layout_alignParentEnd="true" />
+            </RelativeLayout>
+
+            <!-- Radius Slider Block -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bán kính tìm quán"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvRadiusVal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2.0 km"
+                    android:textColor="@color/forest_green"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:layout_alignParentEnd="true" />
+            </RelativeLayout>
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/sliderRadius"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:valueFrom="0.5"
+                android:valueTo="5.0"
+                android:value="2.0"
+                android:stepSize="0.5"
+                app:thumbColor="@color/white"
+                app:thumbStrokeColor="@color/forest_green"
+                app:thumbStrokeWidth="2dp"
+                app:trackColorActive="@color/forest_green"
+                app:trackColorInactive="#E0E0E0"
+                app:trackHeight="4dp"
+                app:haloRadius="0dp" />
+
+            <!-- Underneath Labels -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="100 m"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_muted"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2.0 km"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/forest_green"
+                    android:layout_centerInParent="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5 km"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_muted"
+                    android:layout_alignParentEnd="true" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <!-- Compact Spinning Wheel -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center">
+
+            <com.example.btl_didong.SpinningWheelView
+                android:id="@+id/spinningWheel"
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:layout_centerInParent="true" />
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="6dp"
+                android:src="@drawable/ic_arrow_left"
+                android:contentDescription="Pointer" />
+        </RelativeLayout>
+
+        <!-- Spin Action Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSpin"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Quay chọn món ngay"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:icon="@android:drawable/btn_star_big_on"
+            app:iconGravity="start"
+            app:backgroundTint="@color/forest_green"
+            app:cornerRadius="12dp"
+            android:layout_marginBottom="4dp" />
+
+        <!-- RESULT CONTAINER -->
+        <LinearLayout
+            android:id="@+id/layoutResultSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+
+            <!-- Result Selected Food Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/forest_green_light"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_bookmark"
+                    app:tint="@color/forest_green"
+                    android:background="#D2E4D9"
+                    android:padding="6dp"
+                    android:contentDescription="Checkmark" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="MÓN ĐƯỢC CHỌN"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/forest_green"
+                        android:letterSpacing="0.05" />
+
+                    <TextView
+                        android:id="@+id/tvSelectedFoodName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ăn vặt"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_dark" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Reroll Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSpinAgain"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="🔄 Quay lại món khác"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/forest_green"
+                app:cornerRadius="12dp"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Nearby Header Section -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp">
+
+                <TextView
+                    android:id="@+id/tvNearbySectionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quán bán Ăn vặt gần bạn"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark" />
+
+                <TextView
+                    android:id="@+id/tvBadgeCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1 quán"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/forest_green"
+                    android:background="@color/forest_green_light"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Trong bán kính 2.0 km · đã xếp theo đánh giá"
+                android:textSize="12sp"
+                android:textColor="@color/text_muted"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Place Cards Container -->
+            <LinearLayout
+                android:id="@+id/containerNearbyPlaces"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

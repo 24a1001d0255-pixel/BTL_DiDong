@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/cream_bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="NHỮNG LỰA CHỌN"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/brown_accent"
+                    android:letterSpacing="0.05" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bộ sưu tập"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1.2 km"
+                app:icon="@drawable/ic_map"
+                app:iconTint="@color/forest_green"
+                app:strokeColor="@color/forest_green"
+                android:textColor="@color/forest_green"
+                app:cornerRadius="20dp"
+                android:backgroundTint="@color/white" />
+        </LinearLayout>
+
+        <!-- Search Bar -->
+        <EditText
+            android:id="@+id/etSearchSaved"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_card"
+            android:hint="Tìm món hoặc quán"
+            android:paddingHorizontal="16dp"
+            android:textSize="14sp"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:drawablePadding="10dp"
+            android:layout_marginBottom="16dp"
+            android:inputType="text"
+            android:autofillHints="" />
+
+        <!-- Tab Header Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:id="@+id/tabSavedFoods"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginEnd="24dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/tvTabSavedFoods"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Món đã lưu"
+                    android:textColor="@color/forest_green"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+
+                <View
+                    android:id="@+id/indicatorTabSavedFoods"
+                    android:layout_width="match_parent"
+                    android:layout_height="3dp"
+                    android:background="@color/forest_green"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tabSavedPlaces"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginEnd="24dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/tvTabSavedPlaces"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quán"
+                    android:textColor="@color/text_muted"
+                    android:textSize="15sp" />
+
+                <View
+                    android:id="@+id/indicatorTabSavedPlaces"
+                    android:layout_width="match_parent"
+                    android:layout_height="3dp"
+                    android:background="@color/forest_green"
+                    android:layout_marginTop="4dp"
+                    android:visibility="invisible" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tabSavedLists"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:id="@+id/tvTabSavedLists"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Danh sách"
+                    android:textColor="@color/text_muted"
+                    android:textSize="15sp" />
+
+                <View
+                    android:id="@+id/indicatorTabSavedLists"
+                    android:layout_width="match_parent"
+                    android:layout_height="3dp"
+                    android:background="@color/forest_green"
+                    android:layout_marginTop="4dp"
+                    android:visibility="invisible" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- TAB 1 CONTENT: Saved Foods Grid (RecyclerView 2 columns) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSavedFoods"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:visibility="visible" />
+
+        <!-- TAB 2 CONTENT: Saved Places List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSavedPlaces"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:visibility="gone" />
+
+        <!-- TAB 3 CONTENT: Saved Lists -->
+        <LinearLayout
+            android:id="@+id/contentSavedLists"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- Container for List Rows -->
+            <LinearLayout
+                android:id="@+id/containerCustomLists"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- List 1 -->
+                <LinearLayout
+                    android:id="@+id/itemCustomList1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_card"
+                    android:padding="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_bookmark"
+                        app:tint="@color/forest_green"
+                        android:background="#E8F0EE"
+                        android:padding="8dp"
+                        android:contentDescription="Folder" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
+
+                        <TextView
+                            android:id="@+id/tvListName1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Quán trưa văn phòng"
+                            android:textStyle="bold"
+                            android:textSize="15sp"
+                            android:textColor="@color/text_dark" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="8 mục · Riêng tư"
+                            android:textSize="12sp"
+                            android:textColor="@color/text_muted"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=">"
+                        android:textSize="18sp"
+                        android:textColor="@color/text_muted" />
+                </LinearLayout>
+
+                <!-- List 2 -->
+                <LinearLayout
+                    android:id="@+id/itemCustomList2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_card"
+                    android:padding="16dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_bookmark"
+                        app:tint="@color/forest_green"
+                        android:background="#E8F0EE"
+                        android:padding="8dp"
+                        android:contentDescription="Folder" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="12dp">
+
+                        <TextView
+                            android:id="@+id/tvListName2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Cuối tuần đi nhóm"
+                            android:textStyle="bold"
+                            android:textSize="15sp"
+                            android:textColor="@color/text_dark" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="12 mục · Công khai"
+                            android:textSize="12sp"
+                            android:textColor="@color/text_muted"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=">"
+                        android:textSize="18sp"
+                        android:textColor="@color/text_muted" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Create New List Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCreateNewList"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="+ Tạo danh sách mới"
+                android:textColor="@color/text_dark"
+                android:textSize="14sp"
+                app:strokeColor="#CCCCCC"
+                app:cornerRadius="12dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

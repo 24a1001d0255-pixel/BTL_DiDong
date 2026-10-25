@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_card"
+    android:padding="20dp">
+
+    <!-- Header Section -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@id/tvDetailRating">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="THÔNG TIN QUÁN"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/brown_accent"
+                android:letterSpacing="0.05" />
+
+            <TextView
+                android:id="@+id/tvDetailPlaceName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bếp Việt 1988"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark" />
+
+            <TextView
+                android:id="@+id/tvDetailSub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1.2 km · 16 phút · 40k–90k"
+                android:textSize="13sp"
+                android:textColor="@color/text_muted"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvDetailRating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4.8 điểm"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="@color/forest_green"
+            android:background="#E8F0EE"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true" />
+    </RelativeLayout>
+
+    <!-- Dish Card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#F8F4EE"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_bookmark"
+            app:tint="@color/brown_accent"
+            android:background="@color/white"
+            android:padding="8dp"
+            android:contentDescription="Dish icon" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Món gợi ý"
+                android:textSize="11sp"
+                android:textColor="@color/text_muted" />
+
+            <TextView
+                android:id="@+id/tvDetailDishName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bún"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Google Maps Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnOpenGoogleMaps"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="Xem đường đi trên Google Maps"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:icon="@drawable/ic_map"
+        app:iconTint="@color/white"
+        app:iconGravity="textStart"
+        app:backgroundTint="@color/forest_green"
+        app:cornerRadius="12dp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- External Apps Row (ShopeeFood & GrabFood) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenShopeeFood"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="ShopeeFood"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:backgroundTint="#EE4D2D"
+            app:cornerRadius="12dp"
+            android:layout_marginEnd="6dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenGrabFood"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="GrabFood"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:backgroundTint="#00B14F"
+            app:cornerRadius="12dp"
+            android:layout_marginStart="6dp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Liên kết sẽ mở ứng dụng đối tác nếu đã cài đặt"
+        android:textSize="11sp"
+        android:textColor="@color/text_muted" />
+
+</LinearLayout>

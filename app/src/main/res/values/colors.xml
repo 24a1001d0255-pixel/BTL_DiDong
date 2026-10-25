@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#1F2421</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="teal_700">#1E4334</color>
+    <color name="cream_bg">#FAF8F5</color>
+    <color name="forest_green">#1E4334</color>
+    <color name="forest_green_light">#EAF2EE</color>
+    <color name="forest_green_dark">#122E23</color>
+    <color name="brown_accent">#9A5A38</color>
+    <color name="brown_light">#F8EFEA</color>
+    <color name="card_bg">#FFFFFF</color>
+    <color name="text_dark">#1F2421</color>
+    <color name="text_muted">#727A75</color>
+    <color name="stroke_color">#EBE7E1</color>
+</resources>
