@@ -46,4 +46,10 @@ dependencies {
     // Thư viện Gson (Dùng để đọc file JSON nạp vào Database)
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // OsmDroid (OpenStreetMap)
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
+
+    // SwipeRefreshLayout
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }

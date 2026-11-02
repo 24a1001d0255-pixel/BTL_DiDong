@@ -1,13 +1,19 @@
 package com.example.btl_didong;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.RestaurantViewHolder> {
@@ -40,11 +46,11 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         Restaurant restaurant = restaurantList.get(position);
 
         if (holder.tvName != null) holder.tvName.setText(restaurant.getName());
-        if (holder.tvRating != null) holder.tvRating.setText(String.valueOf(restaurant.getRating()));
+        if (holder.tvRating != null) holder.tvRating.setText("★ " + restaurant.getRating());
         if (holder.tvSub != null) holder.tvSub.setText(restaurant.getDistance() + " • " + restaurant.getPriceRange());
-        if (holder.tag1 != null) holder.tag1.setText(" " + restaurant.getTag1() + " ");
-        if (holder.tag2 != null) holder.tag2.setText(" " + restaurant.getTag2() + " ");
-        if (holder.tagMatch != null) holder.tagMatch.setText(" Khớp món ");
+        if (holder.tag1 != null) holder.tag1.setText(restaurant.getTag1());
+        if (holder.tag2 != null) holder.tag2.setText(restaurant.getTag2());
+        if (holder.tagMatch != null) holder.tagMatch.setText("Khớp " + restaurant.getTag1());
 
         if (holder.imgRestaurant != null) {
             Glide.with(holder.itemView.getContext())
@@ -54,11 +60,48 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
                     .into(holder.imgRestaurant);
         }
 
+        if (holder.btnSaveBookmark != null) {
+            Context ctx = holder.itemView.getContext();
+            SharedPreferences prefs = ctx.getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
+            String savedStr = prefs.getString("saved_restaurants", "");
+            boolean isSaved = savedStr.contains(restaurant.getName());
+
+            updateBookmarkUI(holder.btnSaveBookmark, isSaved, ctx);
+
+            holder.btnSaveBookmark.setOnClickListener(v -> {
+                SharedPreferences sp = v.getContext().getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
+                String current = sp.getString("saved_restaurants", "");
+                boolean nowSaved;
+                if (!current.contains(restaurant.getName())) {
+                    current = restaurant.getName() + ";" + current;
+                    nowSaved = true;
+                    Toast.makeText(v.getContext(), "⭐ Đã lưu quán: " + restaurant.getName() + " vào Bộ sưu tập!", Toast.LENGTH_SHORT).show();
+                } else {
+                    current = current.replace(restaurant.getName() + ";", "");
+                    nowSaved = false;
+                    Toast.makeText(v.getContext(), "Đã bỏ lưu: " + restaurant.getName(), Toast.LENGTH_SHORT).show();
+                }
+                sp.edit().putString("saved_restaurants", current).apply();
+                updateBookmarkUI(holder.btnSaveBookmark, nowSaved, v.getContext());
+            });
+        }
+
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onRestaurantClick(restaurant);
             }
         });
+    }
+
+    private void updateBookmarkUI(ImageView btn, boolean isSaved, Context context) {
+        if (btn == null || context == null) return;
+        if (isSaved) {
+            btn.setBackgroundResource(R.drawable.bg_bookmark_saved);
+            btn.setColorFilter(context.getResources().getColor(R.color.white));
+        } else {
+            btn.setBackgroundResource(R.drawable.bg_bookmark_unsaved);
+            btn.setColorFilter(context.getResources().getColor(R.color.forest_green));
+        }
     }
 
     @Override
@@ -68,11 +111,13 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
 
     public static class RestaurantViewHolder extends RecyclerView.ViewHolder {
         ImageView imgRestaurant;
+        ImageView btnSaveBookmark;
         TextView tvName, tvRating, tvSub, tag1, tag2, tagMatch;
 
         public RestaurantViewHolder(@NonNull View itemView) {
             super(itemView);
             imgRestaurant = itemView.findViewById(R.id.imgRestaurant);
+            btnSaveBookmark = itemView.findViewById(R.id.btnSaveBookmark);
             tvName = itemView.findViewById(R.id.tvRestaurantName);
             tvRating = itemView.findViewById(R.id.tvRestaurantRating);
             tvSub = itemView.findViewById(R.id.tvRestaurantSub);

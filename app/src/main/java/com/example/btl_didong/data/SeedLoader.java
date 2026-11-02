@@ -16,9 +16,11 @@ public class SeedLoader {
             AppDatabase db = AppDatabase.get(context);
             PlaceDao dao = db.placeDao();
 
-            // Nếu DB chưa có dòng nào -> Đọc JSON và Insert
-            if (dao.count() == 0) {
+            // Nếu DB chưa có đủ dữ liệu mới (dưới 30 quán) -> Xóa dữ liệu cũ và nạp lại từ places_seed.json
+            if (dao.count() < 30) {
                 try {
+                    dao.clearAllPlaces();
+
                     InputStream is = context.getAssets().open("places_seed.json");
                     InputStreamReader reader = new InputStreamReader(is);
                     

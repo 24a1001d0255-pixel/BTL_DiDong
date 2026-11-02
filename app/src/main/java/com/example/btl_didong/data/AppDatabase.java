@@ -5,10 +5,11 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {Place.class}, version = 2, exportSchema = false)
+@Database(entities = {Place.class, UserHistory.class}, version = 3, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract PlaceDao placeDao();
+    public abstract UserHistoryDao historyDao();
 
     private static volatile AppDatabase INSTANCE;
 

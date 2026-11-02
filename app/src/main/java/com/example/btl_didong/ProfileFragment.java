@@ -16,12 +16,17 @@ import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.example.btl_didong.data.AppDatabase;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+
+import java.util.concurrent.Executors;
 
 public class ProfileFragment extends Fragment {
 
@@ -81,6 +86,12 @@ public class ProfileFragment extends Fragment {
             btnClearHistory.setOnClickListener(v -> {
                 if (prefs != null) {
                     prefs.edit().remove("spin_history").apply();
+                }
+                if (getContext() != null) {
+                    Executors.newSingleThreadExecutor().execute(() -> {
+                        AppDatabase db = AppDatabase.get(requireContext().getApplicationContext());
+                        db.historyDao().clearHistory();
+                    });
                 }
                 if (containerHistoryItems != null) {
                     containerHistoryItems.removeAllViews();

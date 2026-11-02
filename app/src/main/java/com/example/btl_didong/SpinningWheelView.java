@@ -122,9 +122,11 @@ public class SpinningWheelView extends View {
     }
 
     public void spinWheel(int resultIndex) {
-        if (items.isEmpty()) return;
+        if (items == null || items.isEmpty()) return;
+        float currentRot = getRotation() % 360f;
+        setRotation(currentRot);
         float sweepAngle = 360f / items.size();
-        float targetAngle = 1800 + 360 - (resultIndex * sweepAngle) - (sweepAngle / 2);
+        float targetAngle = currentRot + 1800 + 360 - (resultIndex * sweepAngle) - (sweepAngle / 2);
 
         this.animate()
                 .rotation(targetAngle)

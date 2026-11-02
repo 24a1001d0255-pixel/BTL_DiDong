@@ -35,7 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_card"
-            android:padding="12dp"
+            android:padding="16dp"
             android:orientation="vertical"
             android:layout_marginBottom="12dp">
 
@@ -45,13 +45,22 @@
                 android:text="1. Khẩu vị ưu tiên của bạn?"
                 android:textStyle="bold"
                 android:textColor="@color/text_dark"
-                android:textSize="14sp"
-                android:layout_marginBottom="8dp" />
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(Cho phép chọn nhiều)"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:layout_marginBottom="10dp" />
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/cgTaste"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:chipSpacingHorizontal="8dp"
+                app:chipSpacingVertical="6dp"
                 app:singleSelection="false">
 
                 <com.google.android.material.chip.Chip
@@ -81,6 +90,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Thanh nhẹ" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSourSweet"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chua ngọt" />
             </com.google.android.material.chip.ChipGroup>
         </LinearLayout>
 
@@ -89,7 +105,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_card"
-            android:padding="12dp"
+            android:padding="16dp"
             android:orientation="vertical"
             android:layout_marginBottom="12dp">
 
@@ -99,13 +115,22 @@
                 android:text="2. Ngân sách trung bình/người?"
                 android:textStyle="bold"
                 android:textColor="@color/text_dark"
-                android:textSize="14sp"
-                android:layout_marginBottom="8dp" />
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(Chọn một mức)"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:layout_marginBottom="10dp" />
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/cgBudget"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:chipSpacingHorizontal="8dp"
+                app:chipSpacingVertical="6dp"
                 app:singleSelection="true">
 
                 <com.google.android.material.chip.Chip
@@ -113,21 +138,28 @@
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Dưới 35k" />
+                    android:text="Dưới 30k (Phù hợp ăn nhanh, bình dân)" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipBudget60"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="35k - 70k" />
+                    android:text="30k - 60k (Phổ biến)" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipBudget100"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Trển 70k" />
+                    android:text="60k - 100k (Thoải mái hơn)" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipBudgetAbove100"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Trên 100k (Sang xịn mịn)" />
             </com.google.android.material.chip.ChipGroup>
         </LinearLayout>
 
@@ -136,7 +168,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_card"
-            android:padding="12dp"
+            android:padding="16dp"
             android:orientation="vertical"
             android:layout_marginBottom="12dp">
 
@@ -146,13 +178,22 @@
                 android:text="3. Phương tiện &amp; Bán kính di chuyển?"
                 android:textStyle="bold"
                 android:textColor="@color/text_dark"
-                android:textSize="14sp"
-                android:layout_marginBottom="8dp" />
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(Chọn một mức - Khớp thanh trượt ngoài app)"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:layout_marginBottom="10dp" />
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/cgTransport"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:chipSpacingHorizontal="8dp"
+                app:chipSpacingVertical="6dp"
                 app:singleSelection="true">
 
                 <com.google.android.material.chip.Chip
@@ -160,14 +201,21 @@
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Đi bộ (bán kính 1.5 km)" />
+                    android:text="Đi bộ (Dưới 1 km)" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipBike"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Xe máy (bán kính 3 km)" />
+                    android:text="Xe máy / Xe đạp (1 km - 3 km)" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipFar"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Đi xa hơn (Trên 3 km)" />
             </com.google.android.material.chip.ChipGroup>
         </LinearLayout>
 
@@ -176,24 +224,40 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_card"
-            android:padding="12dp"
+            android:padding="16dp"
             android:orientation="vertical"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="20dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="4. Món hoặc nguyên liệu cần tránh?"
+                android:text="4. Thành phần hoặc món cần tránh?"
                 android:textStyle="bold"
                 android:textColor="@color/text_dark"
-                android:textSize="14sp"
-                android:layout_marginBottom="8dp" />
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(Cho phép chọn nhiều - Tránh trùng lặp với khẩu vị)"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:layout_marginBottom="10dp" />
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/cgAvoid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:chipSpacingHorizontal="8dp"
+                app:chipSpacingVertical="6dp"
                 app:singleSelection="false">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAvoidGarlic"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Không ăn hành / Tỏi" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipAvoidSeafood"
@@ -203,18 +267,25 @@
                     android:text="Tránh Hải sản" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chipAvoidSpicy"
+                    android:id="@+id/chipAvoidOrgan"
                     style="@style/Widget.MaterialComponents.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Không ăn cay" />
+                    android:text="Tránh Nội tạng" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipAvoidFat"
                     style="@style/Widget.MaterialComponents.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tránh đồ béo/dầu mỡ" />
+                    android:text="Tránh đồ béo / Nhiều dầu mỡ" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAvoidVegetarian"
+                    style="@style/Widget.MaterialComponents.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Đồ chay / Thanh đạm" />
             </com.google.android.material.chip.ChipGroup>
         </LinearLayout>
 
@@ -228,7 +299,21 @@
             android:textSize="15sp"
             android:textStyle="bold"
             app:backgroundTint="@color/forest_green"
-            app:cornerRadius="12dp" />
+            app:cornerRadius="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Skip Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSkipSurvey"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Bỏ qua"
+            android:textColor="@color/text_muted"
+            android:textSize="14sp"
+            app:strokeColor="@color/stroke_color"
+            app:cornerRadius="12dp"
+            android:layout_marginBottom="16dp" />
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
