@@ -145,6 +145,41 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- HEADER FOR LIST DETAIL VIEW (When clicking a list in Tab 3) - PLACED AT THE TOP -->
+        <LinearLayout
+            android:id="@+id/layoutListDetailHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnBackToLists"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="← Quay lại"
+                android:textSize="12sp"
+                app:strokeColor="@color/forest_green"
+                android:textColor="@color/forest_green"
+                app:cornerRadius="18dp"
+                android:backgroundTint="@color/white"
+                android:paddingHorizontal="12dp" />
+
+            <TextView
+                android:id="@+id/tvActiveListName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Quán trưa văn phòng"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:gravity="end" />
+        </LinearLayout>
+
         <!-- TAB 1 CONTENT: Saved Foods Grid (RecyclerView 2 columns) -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvSavedFoods"

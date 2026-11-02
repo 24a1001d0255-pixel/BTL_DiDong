@@ -172,25 +172,7 @@ public class ProfileFragment extends Fragment {
         cbNotif.setText("Nhận thông báo gợi ý món ăn mới");
         cbNotif.setChecked(prefs == null || prefs.getBoolean("pref_notif", true));
 
-        TextView tvLangTitle = new TextView(getContext());
-        tvLangTitle.setText("\nNgôn ngữ hiển thị:");
-        tvLangTitle.setTextSize(14f);
-        tvLangTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-
-        RadioGroup rgLang = new RadioGroup(getContext());
-        RadioButton rbVi = new RadioButton(getContext());
-        rbVi.setText("Tiếng Việt (Việt Nam)");
-        rbVi.setChecked(true);
-
-        RadioButton rbEn = new RadioButton(getContext());
-        rbEn.setText("English (Hoa Kỳ)");
-
-        rgLang.addView(rbVi);
-        rgLang.addView(rbEn);
-
         layout.addView(cbNotif);
-        layout.addView(tvLangTitle);
-        layout.addView(rgLang);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("⚙️ Cài đặt ứng dụng");
