@@ -4,9 +4,8 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,13 +27,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.btl_didong.data.AppDatabase;
 import com.example.btl_didong.data.Place;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.slider.Slider;
-
-import org.osmdroid.api.IMapController;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Marker;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,16 +37,12 @@ import java.util.concurrent.Executors;
 
 public class NearbyFragment extends Fragment {
 
-    private MapView mapView;
     private RecyclerView rvNearby;
-    private Slider sliderRadiusNearby;
-    private TextView tvRadiusValNearby;
-    private TextView tvPlaceCountNearby;
     private MaterialButton btnRandomPickNearby;
+    private MaterialButton btnReloadNearby;
 
-    private double userLat = 20.9850; // Hoàng Mai, Hà Nội
-    private double userLng = 105.8450;
-    private float currentRadiusNearby = 2.0f;
+    private double userLat = 20.9890; // Định Công, Hoàng Mai, Hà Nội
+    private double userLng = 105.8320;
 
     private List<Place> currentPlacesList = new ArrayList<>();
 
@@ -62,44 +51,34 @@ public class NearbyFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_nearby, container, false);
 
-        mapView = view.findViewById(R.id.mapView);
         rvNearby = view.findViewById(R.id.rvNearbyRestaurants);
-        sliderRadiusNearby = view.findViewById(R.id.sliderRadiusNearby);
-        tvRadiusValNearby = view.findViewById(R.id.tvRadiusValNearby);
-        tvPlaceCountNearby = view.findViewById(R.id.tvPlaceCountNearby);
         btnRandomPickNearby = view.findViewById(R.id.btnRandomPickNearby);
+        btnReloadNearby = view.findViewById(R.id.btnReloadNearby);
 
-        if (mapView != null) {
-            mapView.setTileSource(TileSourceFactory.MAPNIK);
-            mapView.setMultiTouchControls(true);
-
-            IMapController mapController = mapView.getController();
-            mapController.setZoom(14.5);
-            mapController.setCenter(new GeoPoint(userLat, userLng));
-        }
+        // Đồng bộ tọa độ theo vị trí đã chọn ở trang Home
+        syncLocationFromHomePreferences();
 
         if (rvNearby != null) {
             rvNearby.setLayoutManager(new LinearLayoutManager(getContext()));
         }
 
-        // 1 & 2. Xin quyền GPS
+        // Xin quyền GPS
         checkAndRequestLocationPermission();
 
-        // 3. Lấy tọa độ GPS hiện tại từ thiết bị
-        fetchGPSCoordinates();
-
-        // 6. Lắng nghe gạt thanh bán kính để lọc lại danh sách động
-        if (sliderRadiusNearby != null) {
-            sliderRadiusNearby.addOnChangeListener((slider, value, fromUser) -> {
-                currentRadiusNearby = value;
-                if (tvRadiusValNearby != null) {
-                    tvRadiusValNearby.setText(String.format(Locale.US, "%.1f km", currentRadiusNearby));
-                }
+        // Nút Reload làm mới danh sách theo vị trí gõ ở trang Home
+        if (btnReloadNearby != null) {
+            btnReloadNearby.setOnClickListener(v -> {
+                syncLocationFromHomePreferences();
                 loadPlacesData();
+                if (getContext() != null) {
+                    SharedPreferences prefs = getContext().getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
+                    String currentAddr = prefs.getString("pref_user_address", "Vị trí hiện tại");
+                    Toast.makeText(getContext(), "🔄 Đã làm mới danh sách quán theo: " + currentAddr, Toast.LENGTH_SHORT).show();
+                }
             });
         }
 
-        // 7. Bấm "Chọn món ngẫu nhiên"
+        // Bấm "Chọn món ngẫu nhiên"
         if (btnRandomPickNearby != null) {
             btnRandomPickNearby.setOnClickListener(v -> {
                 if (!currentPlacesList.isEmpty()) {
@@ -124,27 +103,14 @@ public class NearbyFragment extends Fragment {
         return view;
     }
 
-    private void fetchGPSCoordinates() {
+    private void syncLocationFromHomePreferences() {
         if (getContext() == null) return;
-        try {
-            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-                if (lm != null) {
-                    Location loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    if (loc == null) {
-                        loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                    }
-                    if (loc != null) {
-                        userLat = loc.getLatitude();
-                        userLng = loc.getLongitude();
-                        if (mapView != null) {
-                            mapView.getController().setCenter(new GeoPoint(userLat, userLng));
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        SharedPreferences prefs = getContext().getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
+        float savedLat = prefs.getFloat("pref_user_lat", 20.9890f);
+        float savedLng = prefs.getFloat("pref_user_lng", 105.8320f);
+        if (savedLat != 0 && savedLng != 0) {
+            userLat = savedLat;
+            userLng = savedLng;
         }
     }
 
@@ -159,25 +125,14 @@ public class NearbyFragment extends Fragment {
         Context ctx = getContext() != null ? getContext().getApplicationContext() : null;
         if (ctx == null) return;
 
+        syncLocationFromHomePreferences();
+
         Executors.newSingleThreadExecutor().execute(() -> {
             AppDatabase db = AppDatabase.get(ctx);
             List<Place> allPlaces = db.placeDao().findPlacesExcludingRecent("SOLO", 300000, new ArrayList<>());
 
-            // 6. Tính khoảng cách, lọc theo bán kính (currentRadiusNearby) và sắp xếp tăng dần theo khoảng cách GPS
-            List<Place> filteredPlaces = new ArrayList<>();
-            for (Place p : allPlaces) {
-                double dist = calculateDistanceKm(userLat, userLng, p.lat, p.lng);
-                if (dist <= currentRadiusNearby) {
-                    filteredPlaces.add(p);
-                }
-            }
-
-            if (filteredPlaces.isEmpty()) {
-                filteredPlaces = allPlaces;
-            }
-
-            // Sắp xếp theo khoảng cách từ gần đến xa
-            Collections.sort(filteredPlaces, new Comparator<Place>() {
+            // Sắp xếp tăng dần theo khoảng cách GPS thực tế từ vị trí ở trang Home
+            Collections.sort(allPlaces, new Comparator<Place>() {
                 @Override
                 public int compare(Place o1, Place o2) {
                     double d1 = calculateDistanceKm(userLat, userLng, o1.lat, o1.lng);
@@ -186,24 +141,17 @@ public class NearbyFragment extends Fragment {
                 }
             });
 
-            currentPlacesList = filteredPlaces;
-            final List<Place> finalPlaces = filteredPlaces;
+            currentPlacesList = allPlaces;
+            final List<Place> finalPlaces = allPlaces;
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (!isAdded() || getContext() == null) return;
-                if (tvPlaceCountNearby != null) {
-                    tvPlaceCountNearby.setText(finalPlaces.size() + " quán");
-                }
-                displayPlacesOnMapAndList(finalPlaces);
+                displayPlacesOnList(finalPlaces);
             });
         });
     }
 
-    private void displayPlacesOnMapAndList(List<Place> places) {
-        if (mapView != null) {
-            mapView.getOverlays().clear();
-        }
-
+    private void displayPlacesOnList(List<Place> places) {
         List<Restaurant> list = new ArrayList<>();
 
         for (Place p : places) {
@@ -217,34 +165,13 @@ public class NearbyFragment extends Fragment {
                     String.format(Locale.US, "%.1f km · %d phút", dist, minutes),
                     (p.priceMin / 1000) + "k–" + (p.priceMax / 1000) + "k",
                     p.category != null ? p.category : "Món Việt",
-                    p.address != null ? p.address : "Hoàng Mai"
+                    "Hoàng Mai"
             );
             list.add(r);
-
-            if (mapView != null && p.lat != 0 && p.lng != 0) {
-                GeoPoint point = new GeoPoint(p.lat, p.lng);
-                Marker marker = new Marker(mapView);
-                marker.setPosition(point);
-                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                marker.setTitle(p.name);
-                marker.setSnippet(String.format(Locale.US, "%.1f km • %dk–%dk", dist, p.priceMin / 1000, p.priceMax / 1000));
-
-                marker.setOnMarkerClickListener((m, mv) -> {
-                    showPlaceDetailDialog(r);
-                    return true;
-                });
-
-                mapView.getOverlays().add(marker);
-            }
-        }
-
-        if (mapView != null) {
-            mapView.invalidate();
         }
 
         if (rvNearby != null) {
             RestaurantAdapter adapter = new RestaurantAdapter(list, restaurant -> {
-                centerMapOnRestaurant(restaurant, places);
                 showPlaceDetailDialog(restaurant);
             });
             rvNearby.setAdapter(adapter);
@@ -287,32 +214,11 @@ public class NearbyFragment extends Fragment {
         }
     }
 
-    private void centerMapOnRestaurant(Restaurant restaurant, List<Place> places) {
-        if (mapView == null || restaurant == null) return;
-        for (Place p : places) {
-            if (p.name != null && p.name.equalsIgnoreCase(restaurant.getName())) {
-                GeoPoint target = new GeoPoint(p.lat, p.lng);
-                mapView.getController().animateTo(target);
-                mapView.getController().setZoom(16.5);
-                break;
-            }
-        }
-    }
-
     @Override
     public void onResume() {
         super.onResume();
-        if (mapView != null) {
-            mapView.onResume();
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mapView != null) {
-            mapView.onPause();
-        }
+        syncLocationFromHomePreferences();
+        loadPlacesData();
     }
 
     private void showPlaceDetailDialog(Restaurant place) {
@@ -342,7 +248,7 @@ public class NearbyFragment extends Fragment {
 
         if (btnMaps != null) {
             btnMaps.setOnClickListener(v -> {
-                String uriStr = "https://www.google.com/maps/search/?api=1&query=" + Uri.encode(place.getName() + " " + place.getTag2());
+                String uriStr = "https://www.google.com/maps/search/?api=1&query=" + Uri.encode(place.getName() + " Hoàng Mai");
                 Intent mapsIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriStr));
                 startActivity(mapsIntent);
             });

@@ -49,7 +49,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         if (holder.tvRating != null) holder.tvRating.setText("★ " + restaurant.getRating());
         if (holder.tvSub != null) holder.tvSub.setText(restaurant.getDistance() + " • " + restaurant.getPriceRange());
         if (holder.tag1 != null) holder.tag1.setText(restaurant.getTag1());
-        if (holder.tag2 != null) holder.tag2.setText(restaurant.getTag2());
+        if (holder.tag2 != null) holder.tag2.setText("Hoàng Mai");
         if (holder.tagMatch != null) holder.tagMatch.setText("Khớp " + restaurant.getTag1());
 
         if (holder.imgRestaurant != null) {
@@ -64,24 +64,40 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
             Context ctx = holder.itemView.getContext();
             SharedPreferences prefs = ctx.getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
             String savedStr = prefs.getString("saved_restaurants", "");
-            boolean isSaved = savedStr.contains(restaurant.getName());
+            boolean isSaved = isRestaurantSaved(savedStr, restaurant.getName());
 
             updateBookmarkUI(holder.btnSaveBookmark, isSaved, ctx);
 
             holder.btnSaveBookmark.setOnClickListener(v -> {
                 SharedPreferences sp = v.getContext().getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
-                String current = sp.getString("saved_restaurants", "");
+                String currentStr = sp.getString("saved_restaurants", "");
+                String savedFoodsStr = sp.getString("saved_foods", "");
                 boolean nowSaved;
-                if (!current.contains(restaurant.getName())) {
-                    current = restaurant.getName() + ";" + current;
+
+                if (!isRestaurantSaved(currentStr, restaurant.getName())) {
+                    currentStr = restaurant.getName() + ";" + currentStr;
                     nowSaved = true;
-                    Toast.makeText(v.getContext(), "⭐ Đã lưu quán: " + restaurant.getName() + " vào Bộ sưu tập!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(v.getContext(), "⭐ Đã lưu: " + restaurant.getName() + " vào Bộ sưu tập!", Toast.LENGTH_SHORT).show();
                 } else {
-                    current = current.replace(restaurant.getName() + ";", "");
+                    // Ấn lần 2 ➔ Bỏ lưu khỏi Bộ sưu tập
+                    currentStr = removeRestaurantFromSaved(currentStr, restaurant.getName());
+                    savedFoodsStr = removeRestaurantFromSaved(savedFoodsStr, restaurant.getName());
                     nowSaved = false;
                     Toast.makeText(v.getContext(), "Đã bỏ lưu: " + restaurant.getName(), Toast.LENGTH_SHORT).show();
+
+                    int pos = holder.getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION && restaurantList != null && restaurantList.size() > pos) {
+                        restaurantList.remove(pos);
+                        notifyItemRemoved(pos);
+                        notifyItemRangeChanged(pos, restaurantList.size());
+                    }
                 }
-                sp.edit().putString("saved_restaurants", current).apply();
+
+                sp.edit()
+                        .putString("saved_restaurants", currentStr)
+                        .putString("saved_foods", savedFoodsStr)
+                        .apply();
+
                 updateBookmarkUI(holder.btnSaveBookmark, nowSaved, v.getContext());
             });
         }
@@ -93,13 +109,36 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         });
     }
 
+    private boolean isRestaurantSaved(String savedString, String name) {
+        if (savedString == null || name == null) return false;
+        String[] parts = savedString.split(";");
+        for (String part : parts) {
+            if (part.trim().equalsIgnoreCase(name.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String removeRestaurantFromSaved(String savedString, String name) {
+        if (savedString == null || name == null) return "";
+        String[] parts = savedString.split(";");
+        StringBuilder sb = new StringBuilder();
+        for (String part : parts) {
+            if (!part.trim().isEmpty() && !part.trim().equalsIgnoreCase(name.trim())) {
+                sb.append(part.trim()).append(";");
+            }
+        }
+        return sb.toString();
+    }
+
     private void updateBookmarkUI(ImageView btn, boolean isSaved, Context context) {
         if (btn == null || context == null) return;
         if (isSaved) {
-            btn.setBackgroundResource(R.drawable.bg_bookmark_saved);
+            btn.setBackgroundResource(R.drawable.bg_bookmark_saved); // Tô đậm lá cờ màu xanh
             btn.setColorFilter(context.getResources().getColor(R.color.white));
         } else {
-            btn.setBackgroundResource(R.drawable.bg_bookmark_unsaved);
+            btn.setBackgroundResource(R.drawable.bg_bookmark_unsaved); // Khung rỗng viền xanh
             btn.setColorFilter(context.getResources().getColor(R.color.forest_green));
         }
     }

@@ -39,117 +39,41 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Quán gần bạn"
-                    android:textSize="26sp"
+                    android:textSize="22sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_dark" />
             </LinearLayout>
 
+            <!-- Reload Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReloadNearby"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="🔄 Làm mới"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/forest_green"
+                app:strokeColor="@color/forest_green"
+                app:cornerRadius="19dp"
+                android:backgroundTint="@color/white"
+                android:paddingHorizontal="10dp"
+                android:layout_marginEnd="6dp" />
+
+            <!-- Random Pick Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRandomPickNearby"
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="🎲 Chọn ngẫu nhiên"
-                android:textSize="12sp"
+                android:layout_height="38dp"
+                android:text="🎲 Ngẫu nhiên"
+                android:textSize="11sp"
                 android:textStyle="bold"
-                android:textColor="@color/forest_green"
-                app:strokeColor="@color/forest_green"
-                app:cornerRadius="20dp"
-                android:backgroundTint="@color/white" />
-        </LinearLayout>
-
-        <!-- OSMDROID MAP SECTION -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="220dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeColor="@color/stroke_color"
-            app:strokeWidth="1dp"
-            android:layout_marginBottom="16dp">
-
-            <org.osmdroid.views.MapView
-                android:id="@+id/mapView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Radius Card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:padding="14dp"
-            android:layout_marginBottom="16dp">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Bán kính tìm quán"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_dark" />
-
-                <TextView
-                    android:id="@+id/tvPlaceCountNearby"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="5 quán"
-                    android:textColor="@color/text_muted"
-                    android:textSize="13sp"
-                    android:layout_alignParentEnd="true" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="100 m"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_muted" />
-
-                <TextView
-                    android:id="@+id/tvRadiusValNearby"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="2.0 km"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/forest_green"
-                    android:layout_centerHorizontal="true" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="5 km"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_muted"
-                    android:layout_alignParentEnd="true" />
-            </RelativeLayout>
-
-            <com.google.android.material.slider.Slider
-                android:id="@+id/sliderRadiusNearby"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:valueFrom="0.5"
-                android:valueTo="5.0"
-                android:value="2.0"
-                android:stepSize="0.5"
-                app:thumbColor="@color/white"
-                app:thumbStrokeColor="@color/forest_green"
-                app:thumbStrokeWidth="2dp"
-                app:trackColorActive="@color/forest_green"
-                app:trackColorInactive="#E0E0E0"
-                app:trackHeight="4dp" />
+                android:textColor="@color/brown_accent"
+                app:strokeColor="@color/brown_accent"
+                app:cornerRadius="19dp"
+                android:backgroundTint="@color/white"
+                android:paddingHorizontal="10dp" />
         </LinearLayout>
 
         <!-- Section Title -->

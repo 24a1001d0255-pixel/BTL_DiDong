@@ -20,10 +20,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // OsmDroid Configuration Setup (Tối ưu hóa chạy trên cả Máy ảo và Máy thật)
+        // OsmDroid Configuration Setup (Fix lỗi 403 Tile Usage Policy trên OpenStreetMap)
         Context ctx = getApplicationContext();
         Configuration.getInstance().load(ctx, ctx.getSharedPreferences("osmdroid", Context.MODE_PRIVATE));
-        Configuration.getInstance().setUserAgentValue(getPackageName());
+        Configuration.getInstance().setUserAgentValue("FoodPickerAndroidApp/1.0 (com.example.btl_didong)");
         Configuration.getInstance().setOsmdroidBasePath(ctx.getCacheDir());
         Configuration.getInstance().setOsmdroidTileCache(ctx.getCacheDir());
 

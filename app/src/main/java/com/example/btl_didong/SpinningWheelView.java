@@ -123,14 +123,30 @@ public class SpinningWheelView extends View {
 
     public void spinWheel(int resultIndex) {
         if (items == null || items.isEmpty()) return;
-        float currentRot = getRotation() % 360f;
-        setRotation(currentRot);
-        float sweepAngle = 360f / items.size();
-        float targetAngle = currentRot + 1800 + 360 - (resultIndex * sweepAngle) - (sweepAngle / 2);
+        int size = items.size();
+        if (resultIndex < 0 || resultIndex >= size) return;
+
+        float currentRot = getRotation();
+        float sweepAngle = 360f / size;
+
+        // Góc tâm của miếng bánh resultIndex (tính từ 0 độ ở hướng 3 giờ - nơi con trỏ bên phải chỉ sang trái)
+        float targetSliceCenter = resultIndex * sweepAngle + (sweepAngle / 2f);
+
+        // Góc quay của View để đưa targetSliceCenter về đúng hướng 0 độ (hướng 3 giờ)
+        float targetAngleInCircle = (360f - targetSliceCenter) % 360f;
+
+        float currentMod = (currentRot % 360f + 360f) % 360f;
+        float diff = targetAngleInCircle - currentMod;
+        if (diff < 0) {
+            diff += 360f;
+        }
+
+        // Thêm 5 vòng quay tròn đầy đủ (5 * 360 = 1800 độ)
+        float finalRotation = currentRot + 1800f + diff;
 
         this.animate()
-                .rotation(targetAngle)
-                .setDuration(3000)
+                .rotation(finalRotation)
+                .setDuration(3200)
                 .setInterpolator(new DecelerateInterpolator())
                 .start();
     }

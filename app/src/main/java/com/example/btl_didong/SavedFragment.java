@@ -21,7 +21,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,7 +29,9 @@ import com.example.btl_didong.data.Place;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 public class SavedFragment extends Fragment {
@@ -77,8 +78,9 @@ public class SavedFragment extends Fragment {
         int activeColor = getResources().getColor(R.color.forest_green);
         int mutedColor = getResources().getColor(R.color.text_muted);
 
+        // Cả Tab 1 (Món đã lưu) và Tab 2 (Quán) đều dùng LinearLayoutManager thẻ nằm ngang giống nhau
         if (rvSavedFoods != null) {
-            rvSavedFoods.setLayoutManager(new GridLayoutManager(getContext(), 2));
+            rvSavedFoods.setLayoutManager(new LinearLayoutManager(getContext()));
         }
 
         if (rvSavedPlaces != null) {
@@ -113,11 +115,21 @@ public class SavedFragment extends Fragment {
                 String listName = tvListName1 != null ? tvListName1.getText().toString() : "Quán trưa văn phòng";
                 showCustomListDetailDialog(listName);
             });
+            itemCustomList1.setOnLongClickListener(v -> {
+                String listName = tvListName1 != null ? tvListName1.getText().toString() : "Quán trưa văn phòng";
+                showDeleteListConfirmationDialog(itemCustomList1, listName);
+                return true;
+            });
         }
         if (itemCustomList2 != null) {
             itemCustomList2.setOnClickListener(v -> {
                 String listName = tvListName2 != null ? tvListName2.getText().toString() : "Cuối tuần đi nhóm";
                 showCustomListDetailDialog(listName);
+            });
+            itemCustomList2.setOnLongClickListener(v -> {
+                String listName = tvListName2 != null ? tvListName2.getText().toString() : "Cuối tuần đi nhóm";
+                showDeleteListConfirmationDialog(itemCustomList2, listName);
+                return true;
             });
         }
 
@@ -180,6 +192,30 @@ public class SavedFragment extends Fragment {
         return view;
     }
 
+    private void showDeleteListConfirmationDialog(View listRowView, String listName) {
+        if (getContext() == null || listName == null) return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("🗑️ Xóa danh sách");
+        builder.setMessage("Bạn có chắc chắn muốn xóa danh sách '" + listName + "' không?");
+
+        builder.setPositiveButton("Có", (dialog, which) -> {
+            if (listRowView != null && listRowView.getParent() != null) {
+                ((ViewGroup) listRowView.getParent()).removeView(listRowView);
+            }
+
+            // Xóa khỏi SharedPreferences
+            SharedPreferences prefs = getContext().getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
+            prefs.edit().remove("list_items_" + listName).apply();
+
+            Toast.makeText(getContext(), "🗑️ Đã xóa danh sách: " + listName, Toast.LENGTH_SHORT).show();
+        });
+
+        builder.setNegativeButton("Không", (dialog, which) -> dialog.dismiss());
+
+        builder.show();
+    }
+
     private void showCustomListDetailDialog(String listName) {
         if (getContext() == null) return;
         Context ctx = getContext().getApplicationContext();
@@ -199,7 +235,7 @@ public class SavedFragment extends Fragment {
                             p.name,
                             getFoodImageUrl(p.category),
                             4.8f,
-                            "1.2 km",
+                            "1.2 km · 16 phút",
                             (p.priceMin / 1000) + "k–" + (p.priceMax / 1000) + "k",
                             p.category != null ? p.category : "Món Việt",
                             p.address != null ? p.address : "Hoàng Mai"
@@ -271,7 +307,7 @@ public class SavedFragment extends Fragment {
             AppDatabase db = AppDatabase.get(ctx);
             List<Place> allDbPlaces = db.placeDao().getAllPlaces();
 
-            List<SavedItem> foodList = new ArrayList<>();
+            List<Restaurant> foodPlacesList = new ArrayList<>();
             List<Restaurant> placeList = new ArrayList<>();
 
             // 1. Tải danh sách Quán đã lưu (Saved Places)
@@ -281,22 +317,13 @@ public class SavedFragment extends Fragment {
                             p.name,
                             getFoodImageUrl(p.category),
                             4.8f,
-                            "1.2 km",
+                            "1.2 km · 16 phút",
                             (p.priceMin / 1000) + "k–" + (p.priceMax / 1000) + "k",
                             p.category != null ? p.category : "Món Việt",
                             p.address != null ? p.address : "Hoàng Mai"
                     );
                     placeList.add(r);
-
-                    SavedItem sItem = new SavedItem(
-                            String.valueOf(p.id),
-                            p.name,
-                            (p.priceMin / 1000) + "k–" + (p.priceMax / 1000) + "k • " + (p.address != null ? p.address : "Hoàng Mai"),
-                            getFoodImageUrl(p.category),
-                            "4.8",
-                            "FOOD"
-                    );
-                    foodList.add(sItem);
+                    foodPlacesList.add(r);
                 }
             }
 
@@ -306,20 +333,21 @@ public class SavedFragment extends Fragment {
                 for (String f : foods) {
                     if (!f.trim().isEmpty()) {
                         boolean alreadyAdded = false;
-                        for (SavedItem item : foodList) {
-                            if (item.getTitle().equalsIgnoreCase(f.trim())) {
+                        for (Restaurant r : foodPlacesList) {
+                            if (r.getName().equalsIgnoreCase(f.trim())) {
                                 alreadyAdded = true;
                                 break;
                             }
                         }
                         if (!alreadyAdded) {
-                            foodList.add(new SavedItem(
-                                    String.valueOf(System.currentTimeMillis()),
+                            foodPlacesList.add(new Restaurant(
                                     f.trim(),
-                                    "Món ngon đã lưu từ vòng quay",
                                     getFoodImageUrl(f.trim()),
-                                    "4.8",
-                                    "FOOD"
+                                    4.8f,
+                                    "1.2 km · 16 phút",
+                                    "30k–60k",
+                                    f.trim(),
+                                    "Hoàng Mai"
                             ));
                         }
                     }
@@ -327,31 +355,29 @@ public class SavedFragment extends Fragment {
             }
 
             // Mẫu khởi tạo ban đầu nếu chưa lưu quán nào
-            if (foodList.isEmpty()) {
-                foodList.add(new SavedItem("1", "Phở bò gia truyền Định Công", "45k • Định Công, Hoàng Mai", "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=500", "4.9", "FOOD"));
-                foodList.add(new SavedItem("2", "Cơm tấm A Vương", "40k • Đền Lừ 2, Hoàng Mai", "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500", "4.8", "FOOD"));
-                foodList.add(new SavedItem("3", "Bánh mì chảo Tân Mai", "40k • Tân Mai, Hoàng Mai", "https://images.unsplash.com/photo-1509722747041-616f39b57569?w=500", "4.7", "FOOD"));
-                foodList.add(new SavedItem("4", "Quán Lẩu Nướng BBQ Linh Đàm", "150k • Linh Đàm, Hoàng Mai", "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500", "4.6", "FOOD"));
+            if (foodPlacesList.isEmpty()) {
+                foodPlacesList.add(new Restaurant("Phở Sốt Vang Nguyễn An Ninh", "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=500", 4.8f, "1.2 km · 16 phút", "35k–50k", "Phở", "Nguyễn An Ninh"));
+                foodPlacesList.add(new Restaurant("Lẩu riêu cua bắp bò Đền Lừ", "https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=500", 4.8f, "1.2 km · 16 phút", "90k–160k", "Lẩu", "Hồ Đền Lừ"));
+                foodPlacesList.add(new Restaurant("Ốc luộc & Nem chua rán Hồ Đền Lừ", "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500", 4.8f, "1.2 km · 16 phút", "30k–60k", "Ăn vặt", "Hồ Đền Lừ"));
+                foodPlacesList.add(new Restaurant("Trà sữa Leyao Hoàng Mai", "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=500", 4.8f, "1.2 km · 16 phút", "20k–30k", "Trà sữa", "Tân Mai"));
             }
 
             if (placeList.isEmpty()) {
-                placeList.add(new Restaurant("Phở bò gia truyền Định Công", "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=500", 4.9f, "0.8 km · 12 phút", "45k–75k", "Phở", "Món Việt"));
-                placeList.add(new Restaurant("Cơm sườn 47 Tân Mai", "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500", 4.8f, "1.2 km · 16 phút", "40k–90k", "Cơm", "Món Việt"));
-                placeList.add(new Restaurant("Bánh Mì Góc Phố", "https://images.unsplash.com/photo-1509722747041-616f39b57569?w=500", 4.7f, "1.6 km · 18 phút", "20k–40k", "Bánh mì", "Ăn nhanh"));
-                placeList.add(new Restaurant("Nướng ngói phố Tân Mai", "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500", 4.6f, "2.3 km · 24 phút", "99k–199k", "Đồ nướng", "Lẩu"));
-                placeList.add(new Restaurant("Bún bò Huế O Xuân", "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500", 4.7f, "1.9 km · 20 phút", "40k–70k", "Bún", "Món Việt"));
+                placeList.add(new Restaurant("Phở Sốt Vang Nguyễn An Ninh", "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=500", 4.8f, "1.2 km · 16 phút", "35k–50k", "Phở", "Nguyễn An Ninh"));
+                placeList.add(new Restaurant("Lẩu riêu cua bắp bò Đền Lừ", "https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=500", 4.8f, "1.2 km · 16 phút", "90k–160k", "Lẩu", "Hồ Đền Lừ"));
+                placeList.add(new Restaurant("Ốc luộc & Nem chua rán Hồ Đền Lừ", "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500", 4.8f, "1.2 km · 16 phút", "30k–60k", "Ăn vặt", "Hồ Đền Lừ"));
+                placeList.add(new Restaurant("Trà sữa Leyao Hoàng Mai", "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=500", 4.8f, "1.2 km · 16 phút", "20k–30k", "Trà sữa", "Tân Mai"));
             }
 
-            final List<SavedItem> finalFoods = foodList;
+            final List<Restaurant> finalFoods = foodPlacesList;
             final List<Restaurant> finalPlaces = placeList;
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (!isAdded() || getContext() == null) return;
 
                 if (rvSavedFoods != null) {
-                    SavedAdapter foodAdapter = new SavedAdapter(finalFoods, item -> {
-                        Restaurant r = new Restaurant(item.getTitle(), item.getImageUrl(), 4.8f, "1.2 km", item.getSubtitle(), "Món Việt", "Hoàng Mai");
-                        showPlaceDetailDialog(r);
+                    RestaurantAdapter foodAdapter = new RestaurantAdapter(finalFoods, restaurant -> {
+                        showPlaceDetailDialog(restaurant);
                     });
                     rvSavedFoods.setAdapter(foodAdapter);
                 }
@@ -503,6 +529,10 @@ public class SavedFragment extends Fragment {
         row.addView(btnAdd);
 
         row.setOnClickListener(v -> showCustomListDetailDialog(listName));
+        row.setOnLongClickListener(v -> {
+            showDeleteListConfirmationDialog(row, listName);
+            return true;
+        });
 
         container.addView(row);
     }
@@ -514,89 +544,121 @@ public class SavedFragment extends Fragment {
         Executors.newSingleThreadExecutor().execute(() -> {
             SharedPreferences prefs = ctx.getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
             String savedRestaurants = prefs.getString("saved_restaurants", "");
-            String savedFoods = prefs.getString("saved_foods", "");
 
             AppDatabase db = AppDatabase.get(ctx);
             List<Place> allDbPlaces = db.placeDao().getAllPlaces();
 
-            List<String> availableItems = new ArrayList<>();
+            List<Restaurant> availableList = new ArrayList<>();
 
             // Tải tất cả các quán ăn trong bộ sưu tập đã lưu của người dùng
             for (Place p : allDbPlaces) {
-                if (savedRestaurants.contains(p.name) && !availableItems.contains(p.name)) {
-                    availableItems.add(p.name);
+                if (savedRestaurants.contains(p.name)) {
+                    Restaurant r = new Restaurant(
+                            p.name,
+                            getFoodImageUrl(p.category),
+                            4.8f,
+                            "1.2 km · 16 phút",
+                            (p.priceMin / 1000) + "k–" + (p.priceMax / 1000) + "k",
+                            p.category != null ? p.category : "Món Việt",
+                            p.address != null ? p.address : "Hoàng Mai"
+                    );
+                    availableList.add(r);
                 }
             }
 
-            // Tải các món ăn trong bộ sưu tập đã lưu từ vòng quay
-            if (!savedFoods.isEmpty()) {
-                String[] foods = savedFoods.split(";");
-                for (String f : foods) {
-                    String cleanFood = f.trim();
-                    if (!cleanFood.isEmpty() && !availableItems.contains(cleanFood)) {
-                        availableItems.add("Món: " + cleanFood);
-                    }
-                }
-            }
-
-            // Nếu bộ sưu tập người dùng còn trống, hiển thị danh sách quán mặc định
-            if (availableItems.isEmpty()) {
+            // Nếu bộ sưu tập người dùng còn trống, nạp toàn bộ các quán mẫu từ database
+            if (availableList.isEmpty()) {
                 for (Place p : allDbPlaces) {
-                    if (availableItems.size() < 8) {
-                        availableItems.add(p.name);
+                    Restaurant r = new Restaurant(
+                            p.name,
+                            getFoodImageUrl(p.category),
+                            4.8f,
+                            "1.5 km · 17 phút",
+                            (p.priceMin / 1000) + "k–" + (p.priceMax / 1000) + "k",
+                            p.category != null ? p.category : "Món Việt",
+                            p.address != null ? p.address : "Hoàng Mai"
+                    );
+                    availableList.add(r);
+                }
+            }
+
+            // Đọc lại danh sách các quán đã được chọn vào listName này
+            Set<String> selectedSet = new HashSet<>();
+            String existingSelected = prefs.getString("list_items_" + listName, "");
+            if (!existingSelected.isEmpty()) {
+                String[] items = existingSelected.split(";");
+                for (String item : items) {
+                    if (!item.trim().isEmpty()) {
+                        selectedSet.add(item.trim());
                     }
                 }
             }
 
-            if (availableItems.isEmpty()) {
-                availableItems.add("Phở bò gia truyền Định Công");
-                availableItems.add("Cơm tấm A Vương Đền Lừ");
-                availableItems.add("Bánh mì chảo Tân Mai");
-                availableItems.add("Quán Lẩu Nướng BBQ Linh Đàm");
-            }
-
-            final String[] itemsArray = availableItems.toArray(new String[0]);
-            final boolean[] checkedItems = new boolean[itemsArray.length];
-
-            // Đọc lại các mục đã chọn từ trước
-            String existingSelected = prefs.getString("list_items_" + listName, "");
-            for (int i = 0; i < itemsArray.length; i++) {
-                if (existingSelected.contains(itemsArray[i])) {
-                    checkedItems[i] = true;
-                }
-            }
+            final List<Restaurant> finalAvailableList = availableList;
+            final Set<String> finalInitialSelected = selectedSet;
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (!isAdded() || getContext() == null) return;
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("➕ Chọn quán / món thêm vào danh sách");
+                View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_to_list, null, false);
+                AlertDialog dialog = new AlertDialog.Builder(getContext(), android.R.style.Theme_DeviceDefault_Light_Dialog_NoActionBar)
+                        .setView(dialogView)
+                        .create();
 
-                // LƯU Ý: Không dùng builder.setMessage() vì Android AlertDialog sẽ ẩn mất danh sách MultiChoiceItems!
-                builder.setMultiChoiceItems(itemsArray, checkedItems, (dialog, which, isChecked) -> {
-                    checkedItems[which] = isChecked;
+                if (dialog.getWindow() != null) {
+                    dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                }
+
+                TextView tvTitle = dialogView.findViewById(R.id.tvAddDialogTitle);
+                ImageView btnClose = dialogView.findViewById(R.id.btnCloseAddDialog);
+                RecyclerView rvPlaces = dialogView.findViewById(R.id.rvAddListPlaces);
+                MaterialButton btnConfirm = dialogView.findViewById(R.id.btnConfirmAddToList);
+
+                if (tvTitle != null) {
+                    tvTitle.setText("➕ Chọn quán / món cho " + listName);
+                }
+
+                if (btnClose != null) {
+                    btnClose.setOnClickListener(v -> dialog.dismiss());
+                }
+
+                AddToListAdapter adapter = new AddToListAdapter(finalAvailableList, finalInitialSelected, restaurant -> {
+                    // Khi nhấn vào thẻ quán ➔ Hiện THÔNG TIN QUÁN (Hình 3)
+                    showPlaceDetailDialog(restaurant);
                 });
 
-                builder.setPositiveButton("Lưu vào danh sách", (dialog, which) -> {
-                    StringBuilder newSavedStr = new StringBuilder();
-                    int count = 0;
-                    for (int i = 0; i < checkedItems.length; i++) {
-                        if (checkedItems[i]) {
-                            count++;
-                            newSavedStr.append(itemsArray[i]).append(";");
+                if (rvPlaces != null) {
+                    rvPlaces.setLayoutManager(new LinearLayoutManager(getContext()));
+                    rvPlaces.setAdapter(adapter);
+                }
+
+                if (btnConfirm != null) {
+                    btnConfirm.setOnClickListener(v -> {
+                        Set<String> newSelectedSet = adapter.getSelectedNames();
+                        StringBuilder sb = new StringBuilder();
+                        for (String name : newSelectedSet) {
+                            sb.append(name).append(";");
                         }
-                    }
 
-                    prefs.edit().putString("list_items_" + listName, newSavedStr.toString()).apply();
+                        prefs.edit().putString("list_items_" + listName, sb.toString()).apply();
 
-                    if (tvCount != null) {
-                        tvCount.setText(count + " mục");
-                    }
-                    Toast.makeText(getContext(), "🎉 Đã cập nhật " + count + " quán/món vào '" + listName + "'", Toast.LENGTH_SHORT).show();
-                });
+                        if (tvCount != null) {
+                            tvCount.setText(newSelectedSet.size() + " mục");
+                        }
 
-                builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
-                builder.show();
+                        Toast.makeText(getContext(), "🎉 Đã cập nhật " + newSelectedSet.size() + " quán/món vào '" + listName + "'", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    });
+                }
+
+                dialog.show();
+
+                if (dialog.getWindow() != null && getActivity() != null) {
+                    DisplayMetrics metrics = new DisplayMetrics();
+                    getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+                    int width = (int) (metrics.widthPixels * 0.92);
+                    dialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+                }
             });
         });
     }

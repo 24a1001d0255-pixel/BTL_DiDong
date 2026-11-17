@@ -43,6 +43,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.slider.Slider;
 
+import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapListener;
 import org.osmdroid.events.ScrollEvent;
 import org.osmdroid.events.ZoomEvent;
@@ -53,6 +54,8 @@ import org.osmdroid.views.MapView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -61,7 +64,7 @@ import java.util.concurrent.Executors;
 public class HomeFragment extends Fragment {
     private SpinningWheelView wheelView;
     private List<String> currentItems = new ArrayList<>(Arrays.asList("Phở", "Cơm", "Bánh mì", "Đồ nướng", "Ăn vặt", "Đồ uống", "Bún", "Lẩu"));
-    private String currentMode = "SOLO";
+    private String currentMode = "SOLO"; // bản hoàn chỉnh
     private String selectedGroupOption = "SINGLE"; // "SINGLE" (Một quán chung) hoặc "CLUSTER" (Cụm quán gần)
     private int groupPeopleCount = 4;
     private int currentBudgetMin = 0;
@@ -119,6 +122,13 @@ public class HomeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        if (getContext() != null) {
+            Configuration.getInstance().load(getContext(), getContext().getSharedPreferences("osmdroid", Context.MODE_PRIVATE));
+            Configuration.getInstance().setUserAgentValue("FoodPickerAndroidApp/1.0 (com.example.btl_didong)");
+            Configuration.getInstance().setOsmdroidBasePath(getContext().getCacheDir());
+            Configuration.getInstance().setOsmdroidTileCache(getContext().getCacheDir());
+        }
+
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         swipeRefreshHome = view.findViewById(R.id.swipeRefreshHome);
@@ -126,6 +136,7 @@ public class HomeFragment extends Fragment {
         wheelView = view.findViewById(R.id.spinningWheel);
         MaterialButton btnSpin = view.findViewById(R.id.btnSpin);
         MaterialButton btnSpinAgain = view.findViewById(R.id.btnSpinAgain);
+        MaterialButton btnFilterByRadius = view.findViewById(R.id.btnFilterByRadius);
         TextView btnEditWheel = view.findViewById(R.id.btnEditWheel);
         tvGroupCount = view.findViewById(R.id.tvGroupCount);
         btnLocationDistance = view.findViewById(R.id.btnLocationDistance);
@@ -221,6 +232,21 @@ public class HomeFragment extends Fragment {
             btnLocationDistance.setOnClickListener(v -> {
                 Intent intent = new Intent(getActivity(), SurveyActivity.class);
                 startActivity(intent);
+            });
+        }
+
+        // Nút lọc lại quán từ gần đến xa theo bán kính đã chọn ở trên
+        if (btnFilterByRadius != null) {
+            btnFilterByRadius.setOnClickListener(v -> {
+                if (!lastSelectedFood.isEmpty() && containerNearbyPlaces != null) {
+                    loadAndDisplayPlaces(lastSelectedFood, containerNearbyPlaces, tvBadgeCount);
+                    if (tvRadiusSubtitle != null) {
+                        tvRadiusSubtitle.setText(String.format(Locale.US, "Trong bán kính %.1f km · đã xếp từ gần đến xa", currentRadius));
+                    }
+                    Toast.makeText(getContext(), String.format(Locale.US, "📍 Đã lọc quán từ gần đến xa trong bán kính %.1f km!", currentRadius), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "Vui lòng quay chọn món trước khi lọc bán kính!", Toast.LENGTH_SHORT).show();
+                }
             });
         }
 
@@ -339,45 +365,81 @@ public class HomeFragment extends Fragment {
             });
         }
 
+        // Vòng quay lọc trực tiếp theo Khoảng Giá (Lựa chọn món nằm trong ngưỡng [currentBudgetMin, currentBudgetMax])
         View.OnClickListener spinAction = v -> {
             checkAndRequestLocationPermission();
 
-            if (currentItems != null && !currentItems.isEmpty()) {
-                int selectedIndex = (int) (Math.random() * currentItems.size());
-                lastSelectedFood = currentItems.get(selectedIndex);
+            if (currentItems == null || currentItems.isEmpty()) return;
+            Context ctx = getContext() != null ? getContext().getApplicationContext() : null;
+            if (ctx == null) return;
 
-                if (wheelView != null) {
-                    wheelView.spinWheel(selectedIndex);
+            Executors.newSingleThreadExecutor().execute(() -> {
+                AppDatabase db = AppDatabase.get(ctx);
+                List<Integer> validIndices = new ArrayList<>();
+
+                // Lọc các ô món ăn mà quán thực tế nằm trong khoảng giá người dùng chọn
+                for (int i = 0; i < currentItems.size(); i++) {
+                    String foodCat = currentItems.get(i);
+                    List<Place> places = db.placeDao().findPlaces(currentMode, foodCat, currentBudgetMax);
+                    boolean hasBudgetMatch = false;
+                    for (Place p : places) {
+                        if (p.priceMin <= currentBudgetMax && p.priceMax >= currentBudgetMin) {
+                            hasBudgetMatch = true;
+                            break;
+                        }
+                    }
+                    if (hasBudgetMatch) {
+                        validIndices.add(i);
+                    }
                 }
 
-                saveSpinToHistory(lastSelectedFood);
-                recordUserHistory(lastSelectedFood, 0, "SPUN");
+                int chosenIndex;
+                if (!validIndices.isEmpty()) {
+                    // Chọn ngẫu nhiên trong số các ô món ăn hợp túi tiền
+                    chosenIndex = validIndices.get((int) (Math.random() * validIndices.size()));
+                } else {
+                    chosenIndex = (int) (Math.random() * currentItems.size());
+                }
 
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    showWinnerWinnerPopup(lastSelectedFood, () -> {
-                        if (layoutResultSection != null) {
-                            layoutResultSection.setVisibility(View.VISIBLE);
-                        }
-                        if (tvSelectedFoodName != null) {
-                            tvSelectedFoodName.setText(lastSelectedFood);
-                        }
-                        if (tvNearbySectionTitle != null) {
-                            tvNearbySectionTitle.setText("Quán bán " + lastSelectedFood + " gần bạn");
-                        }
+                final int selectedIndex = chosenIndex;
+                lastSelectedFood = currentItems.get(selectedIndex);
 
-                        loadAndDisplayPlaces(lastSelectedFood, containerNearbyPlaces, tvBadgeCount);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (!isAdded() || getContext() == null) return;
 
-                        // Bắn Notification gợi ý sau khi quay trúng
-                        if (getContext() != null) {
-                            NotificationHelper.sendSuggestionNotification(getContext(), lastSelectedFood + " - Quán ngon gần bạn", lastSelectedFood, 1);
-                        }
+                    if (wheelView != null) {
+                        wheelView.spinWheel(selectedIndex);
+                    }
 
-                        if (scrollView != null && layoutResultSection != null) {
-                            scrollView.post(() -> scrollView.smoothScrollTo(0, layoutResultSection.getTop()));
-                        }
-                    });
-                }, 3200);
-            }
+                    saveSpinToHistory(lastSelectedFood);
+                    recordUserHistory(lastSelectedFood, 0, "SPUN");
+
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        showWinnerWinnerPopup(lastSelectedFood, () -> {
+                            if (layoutResultSection != null) {
+                                layoutResultSection.setVisibility(View.VISIBLE);
+                            }
+                            if (tvSelectedFoodName != null) {
+                                tvSelectedFoodName.setText(lastSelectedFood);
+                            }
+                            if (tvNearbySectionTitle != null) {
+                                tvNearbySectionTitle.setText("Quán bán " + lastSelectedFood + " gần bạn");
+                            }
+
+                            loadAndDisplayPlaces(lastSelectedFood, containerNearbyPlaces, tvBadgeCount);
+
+                            // Bắn Notification gợi ý sau khi quay trúng
+                            if (getContext() != null) {
+                                NotificationHelper.sendSuggestionNotification(getContext(), lastSelectedFood + " - Quán ngon vừa túi tiền", lastSelectedFood, 1);
+                            }
+
+                            if (scrollView != null && layoutResultSection != null) {
+                                scrollView.post(() -> scrollView.smoothScrollTo(0, layoutResultSection.getTop()));
+                            }
+                        });
+                    }, 3200);
+                });
+            });
         };
 
         btnSpin.setOnClickListener(spinAction);
@@ -458,6 +520,8 @@ public class HomeFragment extends Fragment {
                                         .putFloat("pref_user_lng", (float) userLng)
                                         .apply();
 
+                                saveLocationToHistory(finalAddr, "Vị trí GPS mới cập nhật", userLat, userLng);
+
                                 if (!lastSelectedFood.isEmpty() && containerNearbyPlaces != null) {
                                     loadAndDisplayPlaces(lastSelectedFood, containerNearbyPlaces, tvBadgeCount);
                                 }
@@ -469,6 +533,73 @@ public class HomeFragment extends Fragment {
                 e.printStackTrace();
             }
         }
+    }
+
+    private List<LocationItem> getRecentLocationHistory() {
+        if (getContext() == null) return new ArrayList<>();
+        SharedPreferences prefs = getContext().getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
+        String historyStr = prefs.getString("location_history", "");
+        List<LocationItem> list = new ArrayList<>();
+        if (!historyStr.isEmpty()) {
+            String[] entries = historyStr.split(";;");
+            for (String entry : entries) {
+                String[] parts = entry.split("\\|\\|");
+                if (parts.length >= 4) {
+                    try {
+                        String name = parts[0];
+                        String addr = parts[1];
+                        double lat = Double.parseDouble(parts[2]);
+                        double lng = Double.parseDouble(parts[3]);
+                        list.add(new LocationItem(name, addr, lat, lng));
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
+
+        if (list.isEmpty()) {
+            list.add(new LocationItem("Chung Cư 96 Định Công", "96 Định Công, P.Phương Liệt, TP.Hà Nội", 20.9890, 105.8320));
+            list.add(new LocationItem("Cổng Phụ (Gần nhất)", "Chung Cư 96 Định Công, Hoàng Mai", 20.9892, 105.8322));
+            list.add(new LocationItem("Cổng Chính", "Chung Cư 96 Định Công, Hoàng Mai", 20.9888, 105.8318));
+            list.add(new LocationItem("96A Định Công", "96A Định Công, P.Phương Liệt, TP.Hà Nội", 20.9895, 105.8325));
+            list.add(new LocationItem("13-BT01 Imperial Plaza", "360 Giải Phóng, P.Phương Liệt, TP.Hà Nội", 20.9870, 105.8390));
+            list.add(new LocationItem("19 ngõ 122 Định Công", "122 Định Công, Hoàng Mai, TP.Hà Nội", 20.9880, 105.8310));
+            list.add(new LocationItem("Tòa Nhà A6 Pháp Vân", "Phường Yên Sở, TP.Hà Nội", 20.9750, 105.8420));
+        }
+
+        if (list.size() > 7) {
+            list = new ArrayList<>(list.subList(0, 7));
+        }
+
+        return list;
+    }
+
+    private void saveLocationToHistory(String name, String address, double lat, double lng) {
+        if (getContext() == null || name == null || name.trim().isEmpty()) return;
+        List<LocationItem> history = getRecentLocationHistory();
+
+        for (int i = 0; i < history.size(); i++) {
+            if (history.get(i).name.equalsIgnoreCase(name.trim())) {
+                history.remove(i);
+                break;
+            }
+        }
+
+        history.add(0, new LocationItem(name.trim(), address != null ? address.trim() : name.trim(), lat, lng));
+
+        if (history.size() > 7) {
+            history = new ArrayList<>(history.subList(0, 7));
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (LocationItem item : history) {
+            sb.append(item.name).append("||")
+                    .append(item.address).append("||")
+                    .append(item.lat).append("||")
+                    .append(item.lng).append(";;");
+        }
+
+        SharedPreferences prefs = getContext().getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
+        prefs.edit().putString("location_history", sb.toString()).apply();
     }
 
     private void applyCustomTypedAddress(String customAddress, AlertDialog dialog) {
@@ -507,6 +638,8 @@ public class HomeFragment extends Fragment {
                         .putFloat("pref_user_lat", (float) userLat)
                         .putFloat("pref_user_lng", (float) userLng)
                         .apply();
+
+                saveLocationToHistory(addressQuery, "Địa chỉ bạn đã gõ tìm kiếm", userLat, userLng);
 
                 if (!lastSelectedFood.isEmpty() && containerNearbyPlaces != null) {
                     loadAndDisplayPlaces(lastSelectedFood, containerNearbyPlaces, tvBadgeCount);
@@ -625,16 +758,8 @@ public class HomeFragment extends Fragment {
 
         if (btnClose != null) btnClose.setOnClickListener(v -> dialog.dismiss());
 
-        List<LocationItem> locationItems = new ArrayList<>();
-        locationItems.add(new LocationItem("Chung Cư 96 Định Công", "0.06km • 96 Định Công, P.Phương Liệt, TP.Hà Nội", 20.9890, 105.8320));
-        locationItems.add(new LocationItem("Cổng Phụ (Gần nhất)", "Chung Cư 96 Định Công, Hoàng Mai", 20.9892, 105.8322));
-        locationItems.add(new LocationItem("Cổng Chính", "Chung Cư 96 Định Công, Hoàng Mai", 20.9888, 105.8318));
-        locationItems.add(new LocationItem("96A Định Công", "0.06km • 96A Định Công, P.Phương Liệt, TP.Hà Nội", 20.9895, 105.8325));
-        locationItems.add(new LocationItem("13-BT01 Imperial Plaza", "0.06km • 360 Giải Phóng, P.Phương Liệt, TP.Hà Nội", 20.9870, 105.8390));
-        locationItems.add(new LocationItem("19ngo 122, Định Công", "122 Định Công, Hoàng Mai, TP.Hà Nội", 20.9880, 105.8310));
-        locationItems.add(new LocationItem("Tòa Nhà A6 - Khu Sinh Viên Pháp Vân", "3km • Phường Yên Sở, TP.Hà Nội", 20.9750, 105.8420));
-        locationItems.add(new LocationItem("Ô 19 Lô 3 Đền Lừ 1", "2.41km • P.Tương Mai, TP.Hà Nội", 20.9850, 105.8540));
-        locationItems.add(new LocationItem("Bến Xe Giáp Bát", "0.53km • Giải Phóng, P.Hoàng Mai, TP.Hà Nội", 20.9810, 105.8420));
+        // Lấy danh sách 7 địa chỉ gần nhất (mới nhất đẩy lên đầu)
+        List<LocationItem> locationItems = getRecentLocationHistory();
 
         populateLocationList(containerLoc, locationItems, dialog);
 
@@ -743,6 +868,8 @@ public class HomeFragment extends Fragment {
                                 .putFloat("pref_user_lng", (float) userLng)
                                 .apply();
                     }
+
+                    saveLocationToHistory(loc.name, loc.address, userLat, userLng);
 
                     if (!lastSelectedFood.isEmpty() && containerNearbyPlaces != null) {
                         loadAndDisplayPlaces(lastSelectedFood, containerNearbyPlaces, tvBadgeCount);
@@ -1008,6 +1135,16 @@ public class HomeFragment extends Fragment {
                 }
             }
 
+            // Sắp xếp tăng dần từ quán gần nhất đến xa nhất theo vị trí người dùng
+            Collections.sort(filtered, new Comparator<Place>() {
+                @Override
+                public int compare(Place o1, Place o2) {
+                    double d1 = calculateDistanceKm(userLat, userLng, o1.lat, o1.lng);
+                    double d2 = calculateDistanceKm(userLat, userLng, o2.lat, o2.lng);
+                    return Double.compare(d1, d2);
+                }
+            });
+
             final List<Place> finalPlaces = filtered;
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (!isAdded() || getContext() == null) return;
@@ -1120,6 +1257,16 @@ public class HomeFragment extends Fragment {
             if (filteredPlaces.isEmpty()) {
                 filteredPlaces = rawPlaces;
             }
+
+            // Sắp xếp tăng dần từ quán gần nhất đến xa nhất theo vị trí người dùng
+            Collections.sort(filteredPlaces, new Comparator<Place>() {
+                @Override
+                public int compare(Place o1, Place o2) {
+                    double d1 = calculateDistanceKm(userLat, userLng, o1.lat, o1.lng);
+                    double d2 = calculateDistanceKm(userLat, userLng, o2.lat, o2.lng);
+                    return Double.compare(d1, d2);
+                }
+            });
 
             final List<Place> finalPlaces = filteredPlaces;
             new Handler(Looper.getMainLooper()).post(() -> {

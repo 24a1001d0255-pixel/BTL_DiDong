@@ -625,6 +625,18 @@
                     android:textStyle="bold"
                     app:backgroundTint="@color/forest_green"
                     app:cornerRadius="12dp"
+                    android:layout_marginBottom="10dp" />
+
+                <!-- Filter By Radius Button (Warm Terra Cotta / Different Color) -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFilterByRadius"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="📍 Lọc lại quán từ gần đến xa"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="#E07A5F"
+                    app:cornerRadius="12dp"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Nearby Header Section -->
