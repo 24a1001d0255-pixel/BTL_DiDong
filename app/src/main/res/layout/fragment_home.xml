@@ -260,97 +260,89 @@
                     android:layout_marginBottom="8dp" />
             </LinearLayout>
 
-            <!-- ChipGroup Danh mục Món ăn -->
+            <!-- ChipGroup Danh mục Món ăn (Bỏ tích mặc định, tích món nào hiện món đó lên vòng quay) -->
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chipGroupFood"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 app:chipSpacingHorizontal="6dp"
-                app:chipSpacingVertical="2dp"
+                app:chipSpacingVertical="4dp"
                 app:singleSelection="false">
 
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
-                    android:layout_height="32dp"
+                    android:layout_height="34dp"
                     android:text="Phở"
-                    android:textSize="11sp"
-                    android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/forest_green"
+                    android:textSize="12sp"
+                    app:checkedIconVisible="true"
                     style="@style/Widget.MaterialComponents.Chip.Filter" />
 
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
-                    android:layout_height="32dp"
+                    android:layout_height="34dp"
                     android:text="Cơm"
-                    android:textSize="11sp"
-                    android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/forest_green"
+                    android:textSize="12sp"
+                    app:checkedIconVisible="true"
                     style="@style/Widget.MaterialComponents.Chip.Filter" />
 
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
-                    android:layout_height="32dp"
+                    android:layout_height="34dp"
                     android:text="Bánh mì"
-                    android:textSize="11sp"
-                    android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/forest_green"
+                    android:textSize="12sp"
+                    app:checkedIconVisible="true"
                     style="@style/Widget.MaterialComponents.Chip.Filter" />
 
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
-                    android:layout_height="32dp"
+                    android:layout_height="34dp"
                     android:text="Đồ nướng"
-                    android:textSize="11sp"
-                    android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/forest_green"
+                    android:textSize="12sp"
+                    app:checkedIconVisible="true"
                     style="@style/Widget.MaterialComponents.Chip.Filter" />
 
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
-                    android:layout_height="32dp"
+                    android:layout_height="34dp"
                     android:text="Ăn vặt"
-                    android:textSize="11sp"
-                    android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/forest_green"
+                    android:textSize="12sp"
+                    app:checkedIconVisible="true"
                     style="@style/Widget.MaterialComponents.Chip.Filter" />
 
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
-                    android:layout_height="32dp"
+                    android:layout_height="34dp"
                     android:text="Đồ uống"
-                    android:textSize="11sp"
-                    android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/forest_green"
+                    android:textSize="12sp"
+                    app:checkedIconVisible="true"
                     style="@style/Widget.MaterialComponents.Chip.Filter" />
 
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
-                    android:layout_height="32dp"
+                    android:layout_height="34dp"
                     android:text="Bún"
-                    android:textSize="11sp"
-                    android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/forest_green"
+                    android:textSize="12sp"
+                    app:checkedIconVisible="true"
                     style="@style/Widget.MaterialComponents.Chip.Filter" />
 
                 <com.google.android.material.chip.Chip
                     android:layout_width="wrap_content"
-                    android:layout_height="32dp"
+                    android:layout_height="34dp"
                     android:text="Lẩu"
-                    android:textSize="11sp"
-                    android:textColor="@color/white"
-                    app:chipBackgroundColor="@color/forest_green"
+                    android:textSize="12sp"
+                    app:checkedIconVisible="true"
                     style="@style/Widget.MaterialComponents.Chip.Filter" />
 
             </com.google.android.material.chip.ChipGroup>
 
-            <!-- Khoảng Giá Block (Styled as Image 4) -->
+            <!-- Khoảng Giá Block (Hài hòa theo thiết kế trong hình) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical"
-                android:padding="14dp"
+                android:padding="16dp"
                 android:layout_marginBottom="12dp">
 
                 <TextView
@@ -360,30 +352,29 @@
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_dark"
-                    android:layout_marginBottom="10dp" />
+                    android:layout_marginBottom="12dp" />
 
-                <!-- Min - Max Input Boxes Row (Gray Fill as in Screenshot) -->
+                <!-- Min - Max Input Boxes Row -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="10dp">
+                    android:layout_marginBottom="12dp">
 
                     <EditText
                         android:id="@+id/etPriceMinBox"
                         android:layout_width="0dp"
                         android:layout_weight="1"
-                        android:layout_height="48dp"
+                        android:layout_height="46dp"
                         android:background="@drawable/bg_toggle_group"
                         android:gravity="center"
-                        android:hint="TỐI THIỂU (0k)"
+                        android:hint="Tối thiểu (0k)"
                         android:textColorHint="#9E9890"
                         android:textColor="@color/text_dark"
                         android:textSize="13sp"
-                        android:textStyle="bold"
                         android:inputType="number"
-                        android:paddingHorizontal="10dp" />
+                        android:paddingHorizontal="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -397,16 +388,15 @@
                         android:id="@+id/etPriceMaxBox"
                         android:layout_width="0dp"
                         android:layout_weight="1"
-                        android:layout_height="48dp"
+                        android:layout_height="46dp"
                         android:background="@drawable/bg_toggle_group"
                         android:gravity="center"
-                        android:hint="TỐI ĐA (100k)"
+                        android:hint="Tối đa (100k)"
                         android:textColorHint="#9E9890"
                         android:textColor="@color/text_dark"
                         android:textSize="13sp"
-                        android:textStyle="bold"
                         android:inputType="number"
-                        android:paddingHorizontal="10dp" />
+                        android:paddingHorizontal="8dp" />
                 </LinearLayout>
 
                 <!-- Quick Preset Choice Buttons: 0-100k | 100k-200k | 200k-300k -->
@@ -420,24 +410,26 @@
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="0dp"
                         android:layout_weight="1"
-                        android:layout_height="40dp"
+                        android:layout_height="42dp"
                         android:text="0-100k"
                         android:textSize="12sp"
+                        android:textStyle="bold"
                         android:textColor="@color/forest_green"
                         app:strokeColor="@color/forest_green"
                         app:backgroundTint="@color/forest_green_light"
                         app:cornerRadius="8dp"
                         android:padding="0dp"
-                        android:layout_marginEnd="3dp" />
+                        android:layout_marginEnd="4dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnBudget100_200"
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="0dp"
                         android:layout_weight="1"
-                        android:layout_height="40dp"
+                        android:layout_height="42dp"
                         android:text="100k-200k"
                         android:textSize="12sp"
+                        android:textStyle="bold"
                         android:textColor="@color/text_muted"
                         app:strokeColor="@color/stroke_color"
                         app:backgroundTint="@color/white"
@@ -450,15 +442,16 @@
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="0dp"
                         android:layout_weight="1"
-                        android:layout_height="40dp"
+                        android:layout_height="42dp"
                         android:text="200k-300k"
                         android:textSize="12sp"
+                        android:textStyle="bold"
                         android:textColor="@color/text_muted"
                         app:strokeColor="@color/stroke_color"
                         app:backgroundTint="@color/white"
                         app:cornerRadius="8dp"
                         android:padding="0dp"
-                        android:layout_marginStart="3dp" />
+                        android:layout_marginStart="4dp" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -624,18 +617,6 @@
                     android:textSize="14sp"
                     android:textStyle="bold"
                     app:backgroundTint="@color/forest_green"
-                    app:cornerRadius="12dp"
-                    android:layout_marginBottom="10dp" />
-
-                <!-- Filter By Radius Button (Warm Terra Cotta / Different Color) -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnFilterByRadius"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:text="📍 Lọc lại quán từ gần đến xa"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="#E07A5F"
                     app:cornerRadius="12dp"
                     android:layout_marginBottom="16dp" />
 

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -41,6 +42,8 @@ import com.example.btl_didong.data.Place;
 import com.example.btl_didong.data.UserHistory;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.slider.Slider;
 
 import org.osmdroid.config.Configuration;
@@ -63,8 +66,8 @@ import java.util.concurrent.Executors;
 
 public class HomeFragment extends Fragment {
     private SpinningWheelView wheelView;
-    private List<String> currentItems = new ArrayList<>(Arrays.asList("Phở", "Cơm", "Bánh mì", "Đồ nướng", "Ăn vặt", "Đồ uống", "Bún", "Lẩu"));
-    private String currentMode = "SOLO"; // bản hoàn chỉnh
+    private List<String> currentItems = new ArrayList<>(Arrays.asList("Hãy tích chọn món", "ở thẻ phía trên"));
+    private String currentMode = "SOLO";
     private String selectedGroupOption = "SINGLE"; // "SINGLE" (Một quán chung) hoặc "CLUSTER" (Cụm quán gần)
     private int groupPeopleCount = 4;
     private int currentBudgetMin = 0;
@@ -136,7 +139,6 @@ public class HomeFragment extends Fragment {
         wheelView = view.findViewById(R.id.spinningWheel);
         MaterialButton btnSpin = view.findViewById(R.id.btnSpin);
         MaterialButton btnSpinAgain = view.findViewById(R.id.btnSpinAgain);
-        MaterialButton btnFilterByRadius = view.findViewById(R.id.btnFilterByRadius);
         TextView btnEditWheel = view.findViewById(R.id.btnEditWheel);
         tvGroupCount = view.findViewById(R.id.tvGroupCount);
         btnLocationDistance = view.findViewById(R.id.btnLocationDistance);
@@ -174,16 +176,56 @@ public class HomeFragment extends Fragment {
         tvBadgeCount = view.findViewById(R.id.tvBadgeCount);
         containerNearbyPlaces = view.findViewById(R.id.containerNearbyPlaces);
 
-        updateGroupCount(tvGroupCount);
+        // NẠP VÀ CỐ ĐỊNH VỊ TRÍ ĐÃ LƯU
         loadSavedAddress();
 
-        // Xin quyền GPS và tự động lấy địa chỉ thực tế khi bật ứng dụng
-        checkAndRequestLocationPermission();
-        detectAndSetUserGPSLocation();
+        // Lắng nghe sự kiện tích chọn trên các thẻ Chip danh mục món ăn (BỎ TÍCH MẶC ĐỊNH, tích món nào hiện món đó lên vòng quay)
+        ChipGroup chipGroupFood = view.findViewById(R.id.chipGroupFood);
+        if (chipGroupFood != null && getContext() != null) {
+            ColorStateList bgColors = new ColorStateList(
+                    new int[][]{
+                            new int[]{android.R.attr.state_checked},
+                            new int[]{-android.R.attr.state_checked}
+                    },
+                    new int[]{
+                            getResources().getColor(R.color.forest_green),      // Đã tích: Xanh lá đậm
+                            getResources().getColor(R.color.forest_green_light) // Bỏ tích: Xanh kem nhạt
+                    }
+            );
 
-        if (wheelView != null) {
-            wheelView.setItems(currentItems);
+            ColorStateList textColors = new ColorStateList(
+                    new int[][]{
+                            new int[]{android.R.attr.state_checked},
+                            new int[]{-android.R.attr.state_checked}
+                    },
+                    new int[]{
+                            getResources().getColor(R.color.white),       // Đã tích: Chữ trắng
+                            getResources().getColor(R.color.forest_green) // Bỏ tích: Chữ xanh
+                    }
+            );
+
+            for (int i = 0; i < chipGroupFood.getChildCount(); i++) {
+                View child = chipGroupFood.getChildAt(i);
+                if (child instanceof Chip) {
+                    Chip chip = (Chip) child;
+                    chip.setCheckable(true);
+                    chip.setChecked(false); // BỎ TÍCH HẾT TẤT CẢ MẶC ĐỊNH THEO YÊU CẦU
+                    chip.setChipBackgroundColor(bgColors);
+                    chip.setTextColor(textColors);
+                    chip.setCheckedIconTint(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+
+                    chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                        updateWheelFromSelectedChips(chipGroupFood, tvGroupCount);
+                    });
+                }
+            }
+
+            // Cập nhật trạng thái vòng quay ban đầu khi chưa có món nào được tích
+            updateWheelFromSelectedChips(chipGroupFood, tvGroupCount);
         }
+
+        // Xin quyền GPS
+        checkAndRequestLocationPermission();
 
         // Mở Dialog chọn/sửa vị trí khi bấm vào thanh vị trí
         if (layoutLocationBar != null) {
@@ -211,7 +253,7 @@ public class HomeFragment extends Fragment {
         // Cấu hình Nút Khoảng giá: 0-100k, 100k-200k, 200k-300k & Tự nhập giá
         setupBudgetRangeInputAndButtons();
 
-        // Vuốt xuống ở trên cùng để Reload (Pull to Refresh)
+        // CHỈ VƯỐT XUỐNG Ở TRÊN CÙNG MỚI RELOAD LẠI VỊ TRÍ GPS THỰC TẾ
         if (swipeRefreshHome != null) {
             swipeRefreshHome.setColorSchemeResources(R.color.forest_green);
             swipeRefreshHome.setOnRefreshListener(() -> {
@@ -232,21 +274,6 @@ public class HomeFragment extends Fragment {
             btnLocationDistance.setOnClickListener(v -> {
                 Intent intent = new Intent(getActivity(), SurveyActivity.class);
                 startActivity(intent);
-            });
-        }
-
-        // Nút lọc lại quán từ gần đến xa theo bán kính đã chọn ở trên
-        if (btnFilterByRadius != null) {
-            btnFilterByRadius.setOnClickListener(v -> {
-                if (!lastSelectedFood.isEmpty() && containerNearbyPlaces != null) {
-                    loadAndDisplayPlaces(lastSelectedFood, containerNearbyPlaces, tvBadgeCount);
-                    if (tvRadiusSubtitle != null) {
-                        tvRadiusSubtitle.setText(String.format(Locale.US, "Trong bán kính %.1f km · đã xếp từ gần đến xa", currentRadius));
-                    }
-                    Toast.makeText(getContext(), String.format(Locale.US, "📍 Đã lọc quán từ gần đến xa trong bán kính %.1f km!", currentRadius), Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getContext(), "Vui lòng quay chọn món trước khi lọc bán kính!", Toast.LENGTH_SHORT).show();
-                }
             });
         }
 
@@ -369,7 +396,10 @@ public class HomeFragment extends Fragment {
         View.OnClickListener spinAction = v -> {
             checkAndRequestLocationPermission();
 
-            if (currentItems == null || currentItems.isEmpty()) return;
+            if (currentItems == null || currentItems.isEmpty() || currentItems.get(0).contains("tích chọn món")) {
+                Toast.makeText(getContext(), "Vui lòng tích chọn ít nhất 1 món ở thẻ phía trên!", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Context ctx = getContext() != null ? getContext().getApplicationContext() : null;
             if (ctx == null) return;
 
@@ -459,11 +489,44 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+    private void updateWheelFromSelectedChips(ChipGroup chipGroup, TextView tvGroupCount) {
+        if (chipGroup == null || getContext() == null) return;
+        List<String> selectedList = new ArrayList<>();
+        for (int i = 0; i < chipGroup.getChildCount(); i++) {
+            View child = chipGroup.getChildAt(i);
+            if (child instanceof Chip) {
+                Chip chip = (Chip) child;
+                if (chip.isChecked()) {
+                    selectedList.add(chip.getText().toString().trim());
+                }
+            }
+        }
+
+        if (!selectedList.isEmpty()) {
+            currentItems = selectedList;
+            if (wheelView != null) {
+                wheelView.setItems(currentItems);
+            }
+            if (tvGroupCount != null) {
+                tvGroupCount.setText(currentItems.size() + " nhóm món");
+            }
+        } else {
+            // Khi người dùng chưa tích thẻ nào: hiển thị chữ hướng dẫn trên vòng quay
+            currentItems = new ArrayList<>(Arrays.asList("Hãy tích chọn món", "ở thẻ phía trên"));
+            if (wheelView != null) {
+                wheelView.setItems(currentItems);
+            }
+            if (tvGroupCount != null) {
+                tvGroupCount.setText("0 nhóm món");
+            }
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1001 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            detectAndSetUserGPSLocation();
+            loadSavedAddress();
         }
     }
 
@@ -1000,6 +1063,10 @@ public class HomeFragment extends Fragment {
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (!isAdded() || getContext() == null) return;
+                // Giữ nguyên các item đã tích chọn nếu người dùng đã tùy chỉnh
+                if (currentItems != null && !currentItems.isEmpty() && !currentItems.get(0).contains("tích chọn món")) {
+                    return;
+                }
                 currentItems = finalItems;
                 if (wheelView != null) {
                     wheelView.setItems(currentItems);
