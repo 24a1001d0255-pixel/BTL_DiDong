@@ -64,24 +64,27 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
             Context ctx = holder.itemView.getContext();
             SharedPreferences prefs = ctx.getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
             String savedStr = prefs.getString("saved_restaurants", "");
-            boolean isSaved = isRestaurantSaved(savedStr, restaurant.getName());
+            String savedFoodsStr = prefs.getString("saved_foods", "");
+            boolean isSaved = isRestaurantSaved(savedStr, restaurant.getName()) || isRestaurantSaved(savedFoodsStr, restaurant.getName());
 
             updateBookmarkUI(holder.btnSaveBookmark, isSaved, ctx);
 
             holder.btnSaveBookmark.setOnClickListener(v -> {
                 SharedPreferences sp = v.getContext().getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
                 String currentStr = sp.getString("saved_restaurants", "");
-                String savedFoodsStr = sp.getString("saved_foods", "");
+                String currentFoodsStr = sp.getString("saved_foods", "");
+                boolean currentlySaved = isRestaurantSaved(currentStr, restaurant.getName()) || isRestaurantSaved(currentFoodsStr, restaurant.getName());
                 boolean nowSaved;
 
-                if (!isRestaurantSaved(currentStr, restaurant.getName())) {
+                if (!currentlySaved) {
                     currentStr = restaurant.getName() + ";" + currentStr;
+                    currentFoodsStr = restaurant.getName() + ";" + currentFoodsStr;
                     nowSaved = true;
                     Toast.makeText(v.getContext(), "⭐ Đã lưu: " + restaurant.getName() + " vào Bộ sưu tập!", Toast.LENGTH_SHORT).show();
                 } else {
                     // Ấn lần 2 ➔ Bỏ lưu khỏi Bộ sưu tập
                     currentStr = removeRestaurantFromSaved(currentStr, restaurant.getName());
-                    savedFoodsStr = removeRestaurantFromSaved(savedFoodsStr, restaurant.getName());
+                    currentFoodsStr = removeRestaurantFromSaved(currentFoodsStr, restaurant.getName());
                     nowSaved = false;
                     Toast.makeText(v.getContext(), "Đã bỏ lưu: " + restaurant.getName(), Toast.LENGTH_SHORT).show();
 
@@ -95,7 +98,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
 
                 sp.edit()
                         .putString("saved_restaurants", currentStr)
-                        .putString("saved_foods", savedFoodsStr)
+                        .putString("saved_foods", currentFoodsStr)
                         .apply();
 
                 updateBookmarkUI(holder.btnSaveBookmark, nowSaved, v.getContext());

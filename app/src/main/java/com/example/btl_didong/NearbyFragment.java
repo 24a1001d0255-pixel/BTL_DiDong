@@ -248,9 +248,16 @@ public class NearbyFragment extends Fragment {
 
         if (btnMaps != null) {
             btnMaps.setOnClickListener(v -> {
-                String uriStr = "https://www.google.com/maps/search/?api=1&query=" + Uri.encode(place.getName() + " Hoàng Mai");
-                Intent mapsIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriStr));
-                startActivity(mapsIntent);
+                String searchTarget = place.getName() + " " + (place.getTag2() != null ? place.getTag2() : "Hoàng Mai") + " Hà Nội";
+                Uri mapUri = Uri.parse("geo:20.9890,105.8320?q=" + Uri.encode(searchTarget));
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, mapUri);
+                mapIntent.setPackage("com.google.android.apps.maps");
+                try {
+                    startActivity(mapIntent);
+                } catch (Exception e) {
+                    Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/search/?api=1&query=" + Uri.encode(searchTarget)));
+                    startActivity(webIntent);
+                }
             });
         }
 

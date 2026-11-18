@@ -47,12 +47,6 @@ import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.slider.Slider;
 
 import org.osmdroid.config.Configuration;
-import org.osmdroid.events.MapListener;
-import org.osmdroid.events.ScrollEvent;
-import org.osmdroid.events.ZoomEvent;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -96,7 +90,7 @@ public class HomeFragment extends Fragment {
     private TextView tvBadgeCount;
     private LinearLayout containerNearbyPlaces;
 
-    // Tọa độ vị trí mặc định của người dùng (Chung Cư 96 Định Công, Hà Nội)
+    // Tọa độ vị trí ban đầu của người dùng
     private double userLat = 20.9890;
     private double userLng = 105.8320;
 
@@ -176,10 +170,10 @@ public class HomeFragment extends Fragment {
         tvBadgeCount = view.findViewById(R.id.tvBadgeCount);
         containerNearbyPlaces = view.findViewById(R.id.containerNearbyPlaces);
 
-        // NẠP VÀ CỐ ĐỊNH VỊ TRÍ ĐÃ LƯU
+        // CỐ ĐỊNH VỊ TRÍ ĐÃ LƯU / CHỌN
         loadSavedAddress();
 
-        // Lắng nghe sự kiện tích chọn trên các thẻ Chip danh mục món ăn (BỎ TÍCH MẶC ĐỊNH, tích món nào hiện món đó lên vòng quay)
+        // Lắng nghe sự kiện tích chọn trên các thẻ Chip danh mục món ăn
         ChipGroup chipGroupFood = view.findViewById(R.id.chipGroupFood);
         if (chipGroupFood != null && getContext() != null) {
             ColorStateList bgColors = new ColorStateList(
@@ -209,7 +203,7 @@ public class HomeFragment extends Fragment {
                 if (child instanceof Chip) {
                     Chip chip = (Chip) child;
                     chip.setCheckable(true);
-                    chip.setChecked(false); // BỎ TÍCH HẾT TẤT CẢ MẶC ĐỊNH THEO YÊU CẦU
+                    chip.setChecked(false); // BỎ TÍCH HẾT MẶC ĐỊNH
                     chip.setChipBackgroundColor(bgColors);
                     chip.setTextColor(textColors);
                     chip.setCheckedIconTint(ColorStateList.valueOf(getResources().getColor(R.color.white)));
@@ -220,11 +214,10 @@ public class HomeFragment extends Fragment {
                 }
             }
 
-            // Cập nhật trạng thái vòng quay ban đầu khi chưa có món nào được tích
             updateWheelFromSelectedChips(chipGroupFood, tvGroupCount);
         }
 
-        // Xin quyền GPS
+        // Xin quyền GPS nếu chưa xin
         checkAndRequestLocationPermission();
 
         // Mở Dialog chọn/sửa vị trí khi bấm vào thanh vị trí
@@ -253,7 +246,7 @@ public class HomeFragment extends Fragment {
         // Cấu hình Nút Khoảng giá: 0-100k, 100k-200k, 200k-300k & Tự nhập giá
         setupBudgetRangeInputAndButtons();
 
-        // CHỈ VƯỐT XUỐNG Ở TRÊN CÙNG MỚI RELOAD LẠI VỊ TRÍ GPS THỰC TẾ
+        // CHỈ KHI NÀO VƯỐT KÉO XUỐNG LOAD LẠI MỚI RESET VỀ VỊ TRÍ GPS THỰC TẾ
         if (swipeRefreshHome != null) {
             swipeRefreshHome.setColorSchemeResources(R.color.forest_green);
             swipeRefreshHome.setOnRefreshListener(() -> {
@@ -277,7 +270,7 @@ public class HomeFragment extends Fragment {
             });
         }
 
-        // Lọc theo Bán kính khi kéo slider (Cập nhật số ở trên ngay khi gạt)
+        // Lọc theo Bán kính khi kéo slider
         if (sliderRadius != null) {
             sliderRadius.addOnChangeListener((slider, value, fromUser) -> {
                 currentRadius = value;
@@ -392,7 +385,7 @@ public class HomeFragment extends Fragment {
             });
         }
 
-        // Vòng quay lọc trực tiếp theo Khoảng Giá (Lựa chọn món nằm trong ngưỡng [currentBudgetMin, currentBudgetMax])
+        // Vòng quay lọc trực tiếp theo Khoảng Giá & TRÁNH MÓN ĐÃ LẶP LẠI LẦN TRƯỚC
         View.OnClickListener spinAction = v -> {
             checkAndRequestLocationPermission();
 
@@ -425,10 +418,31 @@ public class HomeFragment extends Fragment {
 
                 int chosenIndex;
                 if (!validIndices.isEmpty()) {
-                    // Chọn ngẫu nhiên trong số các ô món ăn hợp túi tiền
-                    chosenIndex = validIndices.get((int) (Math.random() * validIndices.size()));
+                    // Tránh lặp lại món đã chọn ở lần quay trước nếu có nhiều hơn 1 lựa chọn
+                    List<Integer> nonRepeatedIndices = new ArrayList<>();
+                    for (int idx : validIndices) {
+                        if (!currentItems.get(idx).equalsIgnoreCase(lastSelectedFood)) {
+                            nonRepeatedIndices.add(idx);
+                        }
+                    }
+
+                    if (!nonRepeatedIndices.isEmpty()) {
+                        chosenIndex = nonRepeatedIndices.get((int) (Math.random() * nonRepeatedIndices.size()));
+                    } else {
+                        chosenIndex = validIndices.get((int) (Math.random() * validIndices.size()));
+                    }
                 } else {
-                    chosenIndex = (int) (Math.random() * currentItems.size());
+                    List<Integer> nonRepeatedIndices = new ArrayList<>();
+                    for (int i = 0; i < currentItems.size(); i++) {
+                        if (!currentItems.get(i).equalsIgnoreCase(lastSelectedFood)) {
+                            nonRepeatedIndices.add(i);
+                        }
+                    }
+                    if (!nonRepeatedIndices.isEmpty()) {
+                        chosenIndex = nonRepeatedIndices.get((int) (Math.random() * nonRepeatedIndices.size()));
+                    } else {
+                        chosenIndex = (int) (Math.random() * currentItems.size());
+                    }
                 }
 
                 final int selectedIndex = chosenIndex;
@@ -532,13 +546,17 @@ public class HomeFragment extends Fragment {
 
     private void detectAndSetUserGPSLocation() {
         if (getContext() == null) return;
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             try {
                 LocationManager lm = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
                 if (lm != null) {
                     Location loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                     if (loc == null) {
                         loc = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    }
+                    if (loc == null) {
+                        loc = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
                     }
                     if (loc != null) {
                         userLat = loc.getLatitude();
@@ -567,14 +585,14 @@ public class HomeFragment extends Fragment {
                                     }
                                 }
                             } catch (Exception e) {
-                                detectedAddress = "96 Định Công, Hoàng Mai";
+                                detectedAddress = "Vị trí GPS của bạn";
                             }
 
                             final String finalAddr = detectedAddress;
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 if (!isAdded() || getContext() == null) return;
                                 if (tvCurrentAddress != null) {
-                                    tvCurrentAddress.setText(finalAddr + " ˅");
+                                    tvCurrentAddress.setText(finalAddr.endsWith(" ˅") ? finalAddr : finalAddr + " ˅");
                                 }
                                 SharedPreferences prefs = getContext().getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
                                 prefs.edit()
@@ -583,7 +601,7 @@ public class HomeFragment extends Fragment {
                                         .putFloat("pref_user_lng", (float) userLng)
                                         .apply();
 
-                                saveLocationToHistory(finalAddr, "Vị trí GPS mới cập nhật", userLat, userLng);
+                                saveLocationToHistory(finalAddr, "Vị trí GPS thực tế", userLat, userLng);
 
                                 if (!lastSelectedFood.isEmpty() && containerNearbyPlaces != null) {
                                     loadAndDisplayPlaces(lastSelectedFood, containerNearbyPlaces, tvBadgeCount);
@@ -617,16 +635,6 @@ public class HomeFragment extends Fragment {
                     } catch (Exception ignored) {}
                 }
             }
-        }
-
-        if (list.isEmpty()) {
-            list.add(new LocationItem("Chung Cư 96 Định Công", "96 Định Công, P.Phương Liệt, TP.Hà Nội", 20.9890, 105.8320));
-            list.add(new LocationItem("Cổng Phụ (Gần nhất)", "Chung Cư 96 Định Công, Hoàng Mai", 20.9892, 105.8322));
-            list.add(new LocationItem("Cổng Chính", "Chung Cư 96 Định Công, Hoàng Mai", 20.9888, 105.8318));
-            list.add(new LocationItem("96A Định Công", "96A Định Công, P.Phương Liệt, TP.Hà Nội", 20.9895, 105.8325));
-            list.add(new LocationItem("13-BT01 Imperial Plaza", "360 Giải Phóng, P.Phương Liệt, TP.Hà Nội", 20.9870, 105.8390));
-            list.add(new LocationItem("19 ngõ 122 Định Công", "122 Định Công, Hoàng Mai, TP.Hà Nội", 20.9880, 105.8310));
-            list.add(new LocationItem("Tòa Nhà A6 Pháp Vân", "Phường Yên Sở, TP.Hà Nội", 20.9750, 105.8420));
         }
 
         if (list.size() > 7) {
@@ -795,12 +803,17 @@ public class HomeFragment extends Fragment {
     private void loadSavedAddress() {
         if (getContext() == null) return;
         SharedPreferences prefs = getContext().getSharedPreferences("food_picker_prefs", Context.MODE_PRIVATE);
-        String savedAddr = prefs.getString("pref_user_address", "Chung Cư 96 Định Công");
-        if (tvCurrentAddress != null) {
-            tvCurrentAddress.setText(savedAddr.endsWith(" ˅") ? savedAddr : savedAddr + " ˅");
+        if (prefs.contains("pref_user_address")) {
+            String savedAddr = prefs.getString("pref_user_address", "Vị trí của bạn");
+            if (tvCurrentAddress != null) {
+                tvCurrentAddress.setText(savedAddr.endsWith(" ˅") ? savedAddr : savedAddr + " ˅");
+            }
+            userLat = prefs.getFloat("pref_user_lat", 20.9890f);
+            userLng = prefs.getFloat("pref_user_lng", 105.8320f);
+        } else {
+            // Lần đầu mở app chưa chọn vị trí ➔ Đọc vị trí GPS thực tế lần đầu
+            detectAndSetUserGPSLocation();
         }
-        userLat = prefs.getFloat("pref_user_lat", 20.9890f);
-        userLng = prefs.getFloat("pref_user_lng", 105.8320f);
     }
 
     private void showLocationPickerDialog() {
@@ -1435,9 +1448,20 @@ public class HomeFragment extends Fragment {
 
         if (btnMaps != null) {
             btnMaps.setOnClickListener(v -> {
-                String uriStr = "https://www.google.com/maps/search/?api=1&query=" + Uri.encode((place != null ? place.name + " " + place.address : foodName));
-                Intent mapsIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uriStr));
-                startActivity(mapsIntent);
+                double targetLat = place != null && place.lat != 0 ? place.lat : userLat;
+                double targetLng = place != null && place.lng != 0 ? place.lng : userLng;
+                String targetName = (place != null && place.name != null) ? place.name : foodName;
+
+                String geoUri = String.format(Locale.US, "geo:%.6f,%.6f?q=%.6f,%.6f(%s)", targetLat, targetLng, targetLat, targetLng, Uri.encode(targetName));
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(geoUri));
+                mapIntent.setPackage("com.google.android.apps.maps");
+                try {
+                    startActivity(mapIntent);
+                } catch (Exception e) {
+                    String webUri = String.format(Locale.US, "https://www.google.com/maps/search/?api=1&query=%.6f,%.6f", targetLat, targetLng);
+                    Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUri));
+                    startActivity(webIntent);
+                }
             });
         }
 
