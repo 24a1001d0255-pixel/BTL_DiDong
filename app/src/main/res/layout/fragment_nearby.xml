@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/cream_bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TÌM NHANH QUANH ĐÂY"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/brown_accent"
+                    android:letterSpacing="0.05" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quán gần bạn"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark" />
+            </LinearLayout>
+
+            <!-- Reload Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReloadNearby"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="🔄 Làm mới"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/forest_green"
+                app:strokeColor="@color/forest_green"
+                app:cornerRadius="19dp"
+                android:backgroundTint="@color/white"
+                android:paddingHorizontal="10dp"
+                android:layout_marginEnd="6dp" />
+
+            <!-- Random Pick Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRandomPickNearby"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="🎲 Ngẫu nhiên"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/brown_accent"
+                app:strokeColor="@color/brown_accent"
+                app:cornerRadius="19dp"
+                android:backgroundTint="@color/white"
+                android:paddingHorizontal="10dp" />
+        </LinearLayout>
+
+        <!-- Section Title -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gần nhất"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Theo khoảng cách GPS"
+                android:textColor="@color/forest_green"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true" />
+        </RelativeLayout>
+
+        <!-- RecyclerView for Restaurants -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvNearbyRestaurants"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

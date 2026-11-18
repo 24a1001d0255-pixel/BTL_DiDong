@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_card"
+    android:padding="20dp">
+
+    <!-- Header -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/tvResultTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎉 Món được chọn: Phở"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_dark" />
+
+        <ImageView
+            android:id="@+id/btnCloseResultDialog"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:background="#F0F0F0"
+            android:padding="6dp"
+            android:layout_alignParentEnd="true"
+            android:contentDescription="Close" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/tvResultSub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="3-5 quán gần nhất có món này:"
+        android:textSize="13sp"
+        android:textColor="@color/text_muted"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Container for place cards -->
+    <LinearLayout
+        android:id="@+id/containerPlaceResults"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Expand 5km Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnExpandRadius"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Mở rộng bán kính 5km"
+        android:textColor="@color/forest_green"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        style="?attr/materialButtonOutlinedStyle"
+        app:strokeColor="@color/forest_green"
+        app:cornerRadius="12dp" />
+
+</LinearLayout>
